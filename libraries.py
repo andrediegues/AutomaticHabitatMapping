@@ -17,14 +17,13 @@ def getWantedRowsFromCSVFile(rows, desiredPitch, desiredRoll, bottomLimAltitude,
 def copyWantedRowFilesToMRADir(wantedRows, path):
 
     photosFolderLS = path.split("/")
-    parentPath = commands.getstatusoutput("pwd")[1]
+    #parentPath = commands.getstatusoutput("pwd")[1]
     
-    newDir = parentPath + "/" + "/".join(photosFolderLS[:2]) + "/mra/WantedPics"
-       
+    newDir = "/".join(photosFolderLS[:-2]) + "/Original"
     if not os.path.exists(newDir):  
         os.makedirs(newDir)
         
-    photosPath = parentPath + "/" + "/".join(photosFolderLS[:2]) + "/Photos"
+    photosPath = "/".join(photosFolderLS[:-3]) + "/Photos"
     listOfPhotoDirs = os.listdir(photosPath)
    
     i = 0
@@ -42,6 +41,7 @@ def copyWantedRowFilesToMRADir(wantedRows, path):
     return newDir
 
 def extractAndCompileCLAHEFiles(newDir):
+    print newDir
     status = subprocess.call(["tar", "-xf", "filter1.tar.gz", "-C", newDir])
     os.chdir(newDir)
     subprocess.call(["make"], shell=True)
@@ -55,12 +55,11 @@ def executeCLAHEAlgorithm(newDir, wantedRows):
     os.chdir(newDir)
     print "Applying CLAHE algorithm..."
     for img in wantedRows:
-        if not os.path.exists(img + ".jpg"):
+        if os.path.exists(img + ".jpg"):
+            print "Processed", img + ".jpg"
             subprocess.call(["./filter1", img+".jpg"])
     print "Images successfully retified"
 
-def removeNormalFiles(newDir, wantedRows):
-    print "Removing original files..."
-    for img in wantedRows:
-        if os.path.exists(img + ".jpg"):
-            os.remove(img + ".jpg")
+def organizeDirectory(newDir):
+    print newDir
+    
