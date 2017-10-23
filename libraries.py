@@ -15,11 +15,8 @@ def getWantedRowsFromCSVFile(rows, desiredPitch, desiredRoll, bottomLimAltitude,
     return wantedRows
 
 def copyWantedRowFilesToMRADir(wantedRows, path):
-
     photosFolderLS = path.split("/")
-    #parentPath = commands.getstatusoutput("pwd")[1]
-    
-    newDir = "/".join(photosFolderLS[:-2]) + "/Original"
+    newDir = "/".join(photosFolderLS[:-2]) + "/FilteredPhotos/Original"
     if not os.path.exists(newDir):  
         os.makedirs(newDir)
         
@@ -34,14 +31,14 @@ def copyWantedRowFilesToMRADir(wantedRows, path):
                 if filename in f:
                     i += 1
                     if not os.path.exists(newDir + "/" + f):
-                        print "Copying file\t", i, "/", len(wantedRows)
+                        if i % 100 == 0 or i == len(wantedRows): 
+                            print "Copying file\t", i, "/", len(wantedRows)
                         shutil.copy2(photosPath + "/" + photodir + "/" + f, newDir)
                     else:
                         print "The file", f, "already exists in the destiny directory", "\t",i, "/", len(wantedRows)
     return newDir
 
 def extractAndCompileCLAHEFiles(newDir):
-    print newDir
     status = subprocess.call(["tar", "-xf", "filter1.tar.gz", "-C", newDir])
     os.chdir(newDir)
     subprocess.call(["make"], shell=True)
@@ -56,10 +53,20 @@ def executeCLAHEAlgorithm(newDir, wantedRows):
     print "Applying CLAHE algorithm..."
     for img in wantedRows:
         if os.path.exists(img + ".jpg"):
-            print "Processed", img + ".jpg"
-            subprocess.call(["./filter1", img+".jpg"])
+            if "retifi_"+img+".jpg" not in os.listdir("../Normalized"):
+                if wantedRows.index(img) % 100 == 0 or wantedRows.index(img) == len(wantedRows):
+                    print "Processed", img + ".jpg\t", wantedRows.index(img) + 1,"/", len(wantedRows)
+                subprocess.call(["./filter1", img+".jpg"])
     print "Images successfully retified"
 
 def organizeDirectory(newDir):
-    print newDir
-    
+    normalizedDir = "/".join(newDir.split("/")[:-1]) + "/Normalized"
+    if not os.path.exists(normalizedDir):
+        os.makedirs(normalizedDir)
+    listDir = os.listdir(newDir)
+    movingList = [ a for a in listDir if "retifi" in a]
+    for filename in movingList:
+        if not os.path.exists(normalizedDir + "/" + filename):
+            shutil.move(filename, normalizedDir)
+    for filename in [a for a in os.listdir(newDir) if not a.split(".")[0].isdigit()]:
+        os.remove(filename)
