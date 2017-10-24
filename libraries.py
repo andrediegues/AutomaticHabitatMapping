@@ -49,20 +49,21 @@ def extractAndCompileCLAHEFiles(newDir):
         exit(1)
     
 def executeCLAHEAlgorithm(newDir, wantedRows):
+    normalizedDir = "/".join(newDir.split("/")[:-1]) + "/Normalized"
+    if not os.path.exists(normalizedDir):
+        os.makedirs(normalizedDir)
     os.chdir(newDir)
     print "Applying CLAHE algorithm..."
     for img in wantedRows:
         if os.path.exists(img + ".jpg"):
-            if "retifi_"+img+".jpg" not in os.listdir("../Normalized"):
+            if "retifi_"+img+".jpg" not in os.listdir(normalizedDir):
                 if wantedRows.index(img) % 100 == 0 or wantedRows.index(img) == len(wantedRows):
                     print "Processed", img + ".jpg\t", wantedRows.index(img) + 1,"/", len(wantedRows)
                 subprocess.call(["./filter1", img+".jpg"])
     print "Images successfully retified"
+    return normalizedDir
 
-def organizeDirectory(newDir):
-    normalizedDir = "/".join(newDir.split("/")[:-1]) + "/Normalized"
-    if not os.path.exists(normalizedDir):
-        os.makedirs(normalizedDir)
+def organizeDirectory(newDir, normalizedDir):
     listDir = os.listdir(newDir)
     movingList = [ a for a in listDir if "retifi" in a]
     for filename in movingList:

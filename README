@@ -1,19 +1,18 @@
 #### README #### 
 
 This program can be used to retrieve the photos from a ImagePositions.csv file in which you want the photos with roll and pitch to 7.2º 
-and the altitude limits are between 1.5 and 3 meters. You can always modify this parameters by editing the variables in the main function 
-on the file "filter.py":
+and the altitude limits are between 1.5 and 3 meters. These values can be changed within the execution of the program.
 
-	- desiredPitch
-	- desiredRoll
-	- bottomLimAltitude
-	- upperLimAltitude
+To use this program you need to have installed the libopencv2.4-jni and their dev libraries. The following command does just that:
 
-To use this program you simply extract the tar.gz file and write in the terminal:
+    sudo apt-get install libopencv2.4-jni libopencv*-dev
+
+
+After that just run the following command in the terminal:
 
 	python filter1.py [path to your .csv file]
 
-This program will create a directory called WantedPics in your mra folder with the original photos from the .csv file and with the respective 
-retified images using the CLAHE algorithm.
+This program will create a directory called FilteredPhotos in your mra folder with the Original photos directory and with the respective 
+Normalized directory with the images created using the CLAHE algorithm.
 
 Have fun!  

@@ -19,14 +19,21 @@ def main():
     bottomLimAltitude = 1.5
     upperLimAltitude = 3
     
+    newParameters = raw_input("Provide the pitch (7.2), roll (7.2) and altitude (3.0) values in this order separated by a space.\nIf not provided this values will take their default value:\n")
+    if newParameters and len(newParameters.split()) == 3:
+        parameters = newParameters.split()
+        desiredPitch = float(parameters[0])
+        desiredRoll = float(parameters[1])
+        upperLimAltitude = float(parameters[2])
+    
     wantedRows = libraries.getWantedRowsFromCSVFile(rows, desiredPitch, desiredRoll, bottomLimAltitude, upperLimAltitude)
     
     newDir = libraries.copyWantedRowFilesToMRADir(wantedRows, filepath)
     print "File filtered with pitch = " + str(desiredPitch) + ", roll = " + str(desiredRoll) + " and altitude between " + str(bottomLimAltitude) + " and " + str(upperLimAltitude) + ", which resulted in " + str(len(wantedRows)) + " rows and " + str(round(len(wantedRows) / len(rows) * 100,2)) + " % of data from the original dataset"
 
     libraries.extractAndCompileCLAHEFiles(newDir)
-    libraries.executeCLAHEAlgorithm(newDir, wantedRows)
-    libraries.organizeDirectory(newDir)
+    normalizedImagesDir = libraries.executeCLAHEAlgorithm(newDir, wantedRows)
+    libraries.organizeDirectory(newDir, normalizedImagesDir)
     
     print "exiting..."
     sys.exit(0)
