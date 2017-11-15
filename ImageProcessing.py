@@ -4,12 +4,30 @@
 Created on Thu Nov  9 14:02:43 2017
 
 @author: diegues
+
+This is the module that isto called when filtering an image. It contains some of the possible filters to apply to an image. 
+
+OPTIONS:
+    --red: Returns the gray gradient of the red color.
+    --blue: Returns the gray gradient of the blue color.
+    --green: returns the gray gradient of the green color.
+    --negative: Returns the negative color.
+    --drm: Returns the gray gradient of the Dynamic Range Manipulation.
+    --powerstretch: Returns the contrast stretch using a power function. In this case the power ** (1/2)
+    --linearstretch: Returns the contrast stretch using a linear function.
+
 """
 
 import os
 import sys
 import cv2
+import imageFilters as imf
 
+def mergeGrayGradients(blue, green, red):
+    stretched_blue = imf.linearStretch(blue)
+    stretched_green = imf.linearStretch(green)
+    stretched_red = imf.linearStretch(red)
+    return cv2.merge((stretched_blue, stretched_green, stretched_red))
 
 def main():
     if len(sys.argv) < 2:
@@ -25,12 +43,27 @@ def main():
         sys.exit(1)
     os.chdir(photos_path)
     gray_path = '../GrayScale/'
+    color_path = '../ContrastStretching/ColorMerge/'
+    gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
     if not os.path.exists(gray_path):
         os.mkdir(gray_path)
+    if not os.path.exists('../ContrastStretching'):
+        os.mkdir('../ContrastStretching')
+    if not os.path.exists(color_path):
+        os.mkdir(color_path)
+    if not os.path.exists(gray_cs_path):
+        os.mkdir(gray_cs_path)
     
     for photoname in list_of_photos:
-        gray_photo = cv2.imread(photoname, 0)
+        gray_photo = imf.grayscale(photoname)
         cv2.imwrite(gray_path + 'gray_' + photoname, gray_photo)
+        blue_photo = imf.bluefilter(photoname)
+        green_photo = imf.greenfilter(photoname)
+        red_photo = imf.redfilter(photoname)
+        mix_color_lin_stretch = mergeGrayGradients(blue_photo, green_photo, red_photo)
+        cv2.imwrite(color_path + 'cs_' + photoname, mix_color_lin_stretch)  
+        lin_stretch_gray = imf.linearStretch(gray_photo)
+        cv2.imwrite(gray_cs_path + 'gray_cs_' + photoname, lin_stretch_gray)  
 
 if __name__ == '__main__':
     main()

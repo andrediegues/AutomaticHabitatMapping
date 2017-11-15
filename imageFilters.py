@@ -24,10 +24,12 @@ def redfilter(imgname):
     img = cv2.imread(imgname)
     return img[:,:,2]
 
-def negativefilter(img):
+def negativefilter(imgname):
+    img = cv2.imread(imgname)
     return 255 - img
 
-def drm(img):
+def drm(imgname):
+    img = cv2.imread(imgname)
     return max(img.ravel()) - img
 
 def linearStretch(img):
