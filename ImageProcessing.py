@@ -43,27 +43,33 @@ def main():
         sys.exit(1)
     os.chdir(photos_path)
     gray_path = '../GrayScale/'
-    color_path = '../ContrastStretching/ColorMerge/'
-    gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
+    contrast_path = '../ContrastStretching/'
+    #color_path = '../ContrastStretching/ColorMerge/'
+    #gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
     if not os.path.exists(gray_path):
         os.mkdir(gray_path)
-    if not os.path.exists('../ContrastStretching'):
-        os.mkdir('../ContrastStretching')
-    if not os.path.exists(color_path):
-        os.mkdir(color_path)
-    if not os.path.exists(gray_cs_path):
-        os.mkdir(gray_cs_path)
+    if not os.path.exists(contrast_path):
+        os.mkdir(contrast_path)
+    #if not os.path.exists(color_path):
+     #   os.mkdir(color_path)
+    #if not os.path.exists(gray_cs_path):
+     #   os.mkdir(gray_cs_path)
     
     for photoname in list_of_photos:
+        grayname = 'gray_' + photoname
+        if grayname not in os.listdir(gray_path):
+            gray_photo = imf.grayscale(photoname)
+            cv2.imwrite(gray_path + grayname, gray_photo)
+        
+    for photoname in list_of_photos:
         gray_photo = imf.grayscale(photoname)
-        cv2.imwrite(gray_path + 'gray_' + photoname, gray_photo)
-        blue_photo = imf.bluefilter(photoname)
-        green_photo = imf.greenfilter(photoname)
-        red_photo = imf.redfilter(photoname)
-        mix_color_lin_stretch = mergeGrayGradients(blue_photo, green_photo, red_photo)
-        cv2.imwrite(color_path + 'cs_' + photoname, mix_color_lin_stretch)  
+        #blue_photo = imf.bluefilter(photoname)
+        #green_photo = imf.greenfilter(photoname)
+        #red_photo = imf.redfilter(photoname)
+        #mix_color_lin_stretch = mergeGrayGradients(blue_photo, green_photo, red_photo)
+        #cv2.imwrite(color_path + 'cs_' + photoname, mix_color_lin_stretch)  
         lin_stretch_gray = imf.linearStretch(gray_photo)
-        cv2.imwrite(gray_cs_path + 'gray_cs_' + photoname, lin_stretch_gray)  
+        cv2.imwrite(contrast_path + 'cs_' + photoname, lin_stretch_gray) 
 
 if __name__ == '__main__':
     main()
