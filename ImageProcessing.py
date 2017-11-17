@@ -17,17 +17,45 @@ OPTIONS:
     --linearstretch: Returns the contrast stretch using a linear function.
 
 """
-
 import os
 import sys
 import cv2
 import imageFilters as imf
+import multiprocessing as mp
+
 
 def mergeGrayGradients(blue, green, red):
     stretched_blue = imf.linearStretch(blue)
     stretched_green = imf.linearStretch(green)
     stretched_red = imf.linearStretch(red)
     return cv2.merge((stretched_blue, stretched_green, stretched_red))
+
+def imageHandler(photoname):
+    gray_path = '../GrayScale/'
+    contrast_path = '../ContrastStretching/'
+    #color_path = '../ContrastStretching/ColorMerge/'
+    #gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
+    if not os.path.exists(gray_path):
+        os.mkdir(gray_path)
+    if not os.path.exists(contrast_path):
+        os.mkdir(contrast_path)
+    #if not os.path.exists(color_path):
+     #   os.mkdir(color_path)
+    #if not os.path.exists(gray_cs_path):
+     #   os.mkdir(gray_cs_path)
+    grayname = 'gray_' + photoname
+    if grayname not in os.listdir(gray_path):
+        gray_photo = imf.grayscale(photoname)
+        cv2.imwrite(gray_path + grayname, gray_photo)
+    #blue_photo = imf.bluefilter(photoname)
+    #green_photo = imf.greenfilter(photoname)
+    #red_photo = imf.redfilter(photoname)
+    #mix_color_lin_stretch = mergeGrayGradients(blue_photo, green_photo, red_photo)
+    #cv2.imwrite(color_path + 'cs_' + photoname, mix_color_lin_stretch)  
+    lin_stretch_name = 'cs_' + photoname
+    if lin_stretch_name not in os.listdir(contrast_path):
+        lin_stretch_gray = imf.linearStretch(gray_photo)
+        cv2.imwrite(contrast_path + lin_stretch_name, lin_stretch_gray) 
 
 def main():
     if len(sys.argv) < 2:
@@ -42,34 +70,9 @@ def main():
         print("ERROR: Not all the files are images!")
         sys.exit(1)
     os.chdir(photos_path)
-    gray_path = '../GrayScale/'
-    contrast_path = '../ContrastStretching/'
-    #color_path = '../ContrastStretching/ColorMerge/'
-    #gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
-    if not os.path.exists(gray_path):
-        os.mkdir(gray_path)
-    if not os.path.exists(contrast_path):
-        os.mkdir(contrast_path)
-    #if not os.path.exists(color_path):
-     #   os.mkdir(color_path)
-    #if not os.path.exists(gray_cs_path):
-     #   os.mkdir(gray_cs_path)
     
-    for photoname in list_of_photos:
-        grayname = 'gray_' + photoname
-        if grayname not in os.listdir(gray_path):
-            gray_photo = imf.grayscale(photoname)
-            cv2.imwrite(gray_path + grayname, gray_photo)
-        
-    for photoname in list_of_photos:
-        gray_photo = imf.grayscale(photoname)
-        #blue_photo = imf.bluefilter(photoname)
-        #green_photo = imf.greenfilter(photoname)
-        #red_photo = imf.redfilter(photoname)
-        #mix_color_lin_stretch = mergeGrayGradients(blue_photo, green_photo, red_photo)
-        #cv2.imwrite(color_path + 'cs_' + photoname, mix_color_lin_stretch)  
-        lin_stretch_gray = imf.linearStretch(gray_photo)
-        cv2.imwrite(contrast_path + 'cs_' + photoname, lin_stretch_gray) 
+    pool = mp.Pool(processes=mp.cpu_count())
+    pool.map(imageHandler, list_of_photos)
 
 if __name__ == '__main__':
     main()

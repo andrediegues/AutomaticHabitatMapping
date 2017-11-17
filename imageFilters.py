@@ -9,6 +9,7 @@ Created on Mon Nov 13 15:49:11 2017
 import cv2
 import numpy
 import itertools as it
+import time
 
 def grayscale(imgname):
     return cv2.imread(imgname, 0)
@@ -37,26 +38,24 @@ def createHash(img, bot, top):
     hashmap = {}
     for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
         if img[i,j] not in hashmap:
-            if img[i,j] <= bot or img[i,j] > top:
-                pass
+            if img[i,j] <= bot:
+                hashmap[img[i,j]] = 0
+            elif img[i,j] > top:
+                hashmap[img[i,j]] = 255
             else:
                 hashmap[img[i,j]] = 255 * ((img[i,j] - bot) / (top - bot))
     return hashmap
 
 def linearStretch(img):
-    new_min = 0
-    new_max = 255
+    time0 = time.time()
     bot1percent = numpy.percentile(img.ravel(), 1)
     top99percent = numpy.percentile(img.ravel(), 99)
     hashmap = createHash(img, bot1percent, top99percent)
     img2 = img
     for i, j in it.product(range(img2.shape[0]), range(img2.shape[1])):
-        if img2[i,j] <= bot1percent:
-            img2[i,j] = new_min
-        elif img2[i,j] > top99percent:
-            img2[i,j] = new_max
-        else:
-            img2[i,j] = hashmap[img2[i,j]]
+        img2[i,j] = hashmap[img2[i,j]]
+    time1 = time.time()
+    print(time1 - time0)
     return img2
 
 def powerStretch(img): # not so good but worth a try
