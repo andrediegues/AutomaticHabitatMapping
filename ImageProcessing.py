@@ -17,6 +17,7 @@ OPTIONS:
     --linearstretch: Returns the contrast stretch using a linear function.
 
 """
+from functools import partial
 import os
 import sys
 import cv2
@@ -30,19 +31,7 @@ def mergeGrayGradients(blue, green, red):
     stretched_red = imf.linearStretch(red)
     return cv2.merge((stretched_blue, stretched_green, stretched_red))
 
-def imageHandler(photoname):
-    gray_path = '../GrayScale/'
-    contrast_path = '../ContrastStretching/'
-    #color_path = '../ContrastStretching/ColorMerge/'
-    #gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
-    if not os.path.exists(gray_path):
-        os.mkdir(gray_path)
-    if not os.path.exists(contrast_path):
-        os.mkdir(contrast_path)
-    #if not os.path.exists(color_path):
-     #   os.mkdir(color_path)
-    #if not os.path.exists(gray_cs_path):
-     #   os.mkdir(gray_cs_path)
+def imageHandler(gray_path, contrast_path, photoname):
     grayname = 'gray_' + photoname
     if grayname not in os.listdir(gray_path):
         gray_photo = imf.grayscale(photoname)
@@ -70,9 +59,22 @@ def main():
         print("ERROR: Not all the files are images!")
         sys.exit(1)
     os.chdir(photos_path)
+    gray_path = '../GrayScale/'
+    contrast_path = '../ContrastStretching/'
+    #color_path = '../ContrastStretching/ColorMerge/'
+    #gray_cs_path = '../ContrastStretching/GrayContrastStretch/'
+    if not os.path.exists(gray_path):
+        os.mkdir(gray_path)
+    if not os.path.exists(contrast_path):
+        os.mkdir(contrast_path)
+    #if not os.path.exists(color_path):
+     #   os.mkdir(color_path)
+    #if not os.path.exists(gray_cs_path):
+     #   os.mkdir(gray_cs_path)
     
     pool = mp.Pool(processes=mp.cpu_count())
-    pool.map(imageHandler, list_of_photos)
+    func = partial(imageHandler, gray_path, contrast_path)
+    pool.map(func, list_of_photos)
 
 if __name__ == '__main__':
     main()
