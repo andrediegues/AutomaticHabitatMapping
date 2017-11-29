@@ -67,3 +67,7 @@ def powerStretch(img): # not so good but worth a try
 
     img2 = img2.astype(numpy.uint8)
     return img2
+
+def pseudocoloring(imgname):
+    img = cv2.imread(imgname)
+    return cv2.applyColorMap(img, 5)
