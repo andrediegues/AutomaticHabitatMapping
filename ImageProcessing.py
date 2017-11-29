@@ -23,6 +23,7 @@ import sys
 import cv2
 import imageFilters as imf
 import multiprocessing as mp
+import time
 
 
 def mergeGrayGradients(blue, green, red):
@@ -33,8 +34,8 @@ def mergeGrayGradients(blue, green, red):
 
 def imageHandler(gray_path, contrast_path, photoname):
     grayname = 'gray_' + photoname
+    gray_photo = imf.grayscale(photoname)
     if grayname not in os.listdir(gray_path):
-        gray_photo = imf.grayscale(photoname)
         cv2.imwrite(gray_path + grayname, gray_photo)
     #blue_photo = imf.bluefilter(photoname)
     #green_photo = imf.greenfilter(photoname)
@@ -72,9 +73,12 @@ def main():
     #if not os.path.exists(gray_cs_path):
      #   os.mkdir(gray_cs_path)
     
+    time0 = time.time()
     pool = mp.Pool(processes=mp.cpu_count())
     func = partial(imageHandler, gray_path, contrast_path)
     pool.map(func, list_of_photos)
+    time1 = time.time()
+    print(time1 - time0)
 
 if __name__ == '__main__':
     main()

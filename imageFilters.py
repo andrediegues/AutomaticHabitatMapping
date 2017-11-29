@@ -5,11 +5,10 @@ Created on Mon Nov 13 15:49:11 2017
 
 @author: diegues
 """
-
+# tried numba but increased the processing time by almost a double of what was taking without it
 import cv2
 import numpy
 import itertools as it
-import time
 
 def grayscale(imgname):
     return cv2.imread(imgname, 0)
@@ -47,16 +46,16 @@ def createHash(img, bot, top):
     return hashmap
 
 def linearStretch(img):
-    time0 = time.time()
     bot1percent = numpy.percentile(img.ravel(), 1)
     top99percent = numpy.percentile(img.ravel(), 99)
     hashmap = createHash(img, bot1percent, top99percent)
     img2 = img
+    #img2 = map(hashmap, it.product(range(img2.shape[0]), range(img2.shape[1])))
+    #cv2.imshow("img2", img2)
+    #cv2.waitKey()
     for i, j in it.product(range(img2.shape[0]), range(img2.shape[1])):
         img2[i,j] = hashmap[img2[i,j]]
-    time1 = time.time()
-    print(time1 - time0)
-    return img2
+    return img2[150:840, 220:1140]
 
 def powerStretch(img): # not so good but worth a try
     img2 = img
