@@ -50,9 +50,6 @@ def linearStretch(img):
     top99percent = numpy.percentile(img.ravel(), 99)
     hashmap = createHash(img, bot1percent, top99percent)
     img2 = img
-    #img2 = map(hashmap, it.product(range(img2.shape[0]), range(img2.shape[1])))
-    #cv2.imshow("img2", img2)
-    #cv2.waitKey()
     for i, j in it.product(range(img2.shape[0]), range(img2.shape[1])):
         img2[i,j] = hashmap[img2[i,j]]
     return img2[150:840, 220:1140]
@@ -70,4 +67,4 @@ def powerStretch(img): # not so good but worth a try
 
 def pseudocoloring(imgname):
     img = cv2.imread(imgname)
-    return cv2.applyColorMap(img, 5)
+    return cv2.applyColorMap(img, cv2.COLORMAP_WINTER)

@@ -74,7 +74,8 @@ def mergeGrayGradients(blue, green, red):
     stretched_blue = imf.linearStretch(blue)
     stretched_green = imf.linearStretch(green)
     stretched_red = imf.linearStretch(red)
-    return cv2.merge((stretched_blue, stretched_green, stretched_red))
+    m = cv2.merge((stretched_blue, stretched_green, stretched_red))
+    return cv2.fastNlMeansDenoisingColored(m, None, 4, 4, 7, 21)
 
 def linearStretchHandler(gray_path, contrast_path, photoname):
     grayname = 'gray_' + photoname
