@@ -26,10 +26,7 @@ import multiprocessing as mp
 import time
 
 def applyLinearStretching(photos_path):
-    if not checkPath(photos_path):
-        sys.exit(1)
-    list_of_photos = os.listdir(photos_path)
-    os.chdir(photos_path)
+    list_of_photos = os.listdir(os.getcwd())
     gray_path = '../GrayScale/'
     contrast_path = '../ContrastStretching/'
     createDir(gray_path)
@@ -45,15 +42,13 @@ def applyLinearStretching(photos_path):
     print("Linear stretching took",(time1 - time0) // 60, "minutes and", (time1 - time0) % 60, "seconds.")
     
 def applyPseudoColor(photos_path):
-    if not checkPath(photos_path):
-        sys.exit(1)
-    os.chdir(photos_path)
     contrast_path = '../ContrastStretching/'
-    if not checkPath(photos_path):
+    if not checkPath(contrast_path):
         io = input("Would you like to run the linear stretching so that this option can be executed? [Y/n]")
         if 'n' in io:
             sys.exit(1)
         applyLinearStretching(photos_path)
+    
     list_of_cs_photos = os.listdir(contrast_path)
     pseudocolor_path = "../PseudoColor/"
     createDir(pseudocolor_path)
@@ -68,9 +63,7 @@ def applyPseudoColor(photos_path):
     print("Pseudocoloring took",(time1 - time0) // 60, "minutes and", (time1 - time0)% 60, "seconds.")
 
 def applyMergeStretch(photos_path):
-    checkPath(photos_path)
-    list_of_photos = os.listdir(photos_path)
-    os.chdir(photos_path)
+    list_of_photos = os.listdir(os.getcwd())
     rgbstretch_path = "../RGBstretch/"
     createDir(rgbstretch_path)
     
@@ -85,7 +78,7 @@ def applyMergeStretch(photos_path):
         
 def checkPath(path):
     if not os.path.exists(path):
-        print("ERROR: The path",os.path.abspath(path),"doesn't exist!")
+        print("ERROR: The path", path, "doesn't exist!")
         return False
     return True
 
@@ -128,10 +121,16 @@ def main():
         sys.exit(1)
     elif len(sys.argv) == 2:
         photos_path = sys.argv[1]
+        if not checkPath(photos_path):
+            sys.exit(1) 
+        os.chdir(photos_path)
         applyLinearStretching(photos_path)
         
     elif len(sys.argv) == 3:
         photos_path = sys.argv[2]
+        if not checkPath(photos_path):
+            sys.exit(1)
+        os.chdir(photos_path)
         if "--pseudocolor" in sys.argv:
             applyPseudoColor(photos_path)
         elif "--rgbstretch" in sys.argv:
