@@ -13,16 +13,19 @@ import itertools as it
 def grayscale(imgname):
     return cv2.imread(imgname, 0)
 
-def bluefilter(imgname):
-    img = cv2.imread(imgname)
+def bluefilter(imgname, img = None):
+    if img is None:
+        img = cv2.imread(imgname)
     return img[:,:,0]
     
-def greenfilter(imgname):
-    img = cv2.imread(imgname)
+def greenfilter(imgname, img = None):
+    if img is None:
+        img = cv2.imread(imgname)
     return img[:,:,1]
 
-def redfilter(imgname):
-    img = cv2.imread(imgname)
+def redfilter(imgname, img = None):
+    if img is None:
+        img = cv2.imread(imgname)
     return img[:,:,2]
 
 def negativefilter(imgname):
@@ -68,3 +71,11 @@ def powerStretch(img): # not so good but worth a try
 def pseudocoloring(imgname):
     img = cv2.imread(imgname)
     return cv2.applyColorMap(img, cv2.COLORMAP_WINTER)
+
+def rgbStretch(imgname):
+    img = cv2.imread(imgname)
+    stretched_blue = linearStretch(bluefilter(imgname, img))
+    stretched_green = linearStretch(greenfilter(imgname, img))
+    stretched_red = linearStretch(redfilter(imgname, img))
+    m = cv2.merge((stretched_blue, stretched_green, stretched_red))
+    return cv2.fastNlMeansDenoisingColored(m, None, 4, 4, 7, 21)

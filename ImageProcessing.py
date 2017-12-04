@@ -26,7 +26,8 @@ import multiprocessing as mp
 import time
 
 def applyLinearStretching(photos_path):
-    checkPath(photos_path)
+    if not checkPath(photos_path):
+        sys.exit(1)
     list_of_photos = os.listdir(photos_path)
     os.chdir(photos_path)
     gray_path = '../GrayScale/'
@@ -41,13 +42,18 @@ def applyLinearStretching(photos_path):
     pool.map(func, list_of_photos)
     time1 = time.time()
     
-    print("Linear stretching took",(time1 - time0) // 60, "minutes and", (time1 - time0)% 60, "seconds.")
+    print("Linear stretching took",(time1 - time0) // 60, "minutes and", (time1 - time0) % 60, "seconds.")
     
 def applyPseudoColor(photos_path):
-    checkPath(photos_path)
+    if not checkPath(photos_path):
+        sys.exit(1)
     os.chdir(photos_path)
     contrast_path = '../ContrastStretching/'
-    checkPath(contrast_path)
+    if not checkPath(photos_path):
+        io = input("Would you like to run the linear stretching so that this option can be executed? [Y/n]")
+        if 'n' in io:
+            sys.exit(1)
+        applyLinearStretching(photos_path)
     list_of_cs_photos = os.listdir(contrast_path)
     pseudocolor_path = "../PseudoColor/"
     createDir(pseudocolor_path)
@@ -60,22 +66,38 @@ def applyPseudoColor(photos_path):
     time1 = time.time()
     
     print("Pseudocoloring took",(time1 - time0) // 60, "minutes and", (time1 - time0)% 60, "seconds.")
+
+def applyMergeStretch(photos_path):
+    checkPath(photos_path)
+    list_of_photos = os.listdir(photos_path)
+    os.chdir(photos_path)
+    rgbstretch_path = "../RGBstretch/"
+    createDir(rgbstretch_path)
+    
+    pool = mp.Pool(processes = mp.cpu_count())
+    rgb = partial(rgbStretchHandler, rgbstretch_path)
+    
+    time0 = time.time()
+    pool.map(rgb, list_of_photos)
+    time1 = time.time()
+    
+    print("RGB stretching took",(time1 - time0) // 60, "minutes and", (time1 - time0)% 60, "seconds.")
         
 def checkPath(path):
     if not os.path.exists(path):
-        print("ERROR: The path",path,"doesn't exist!")
-        sys.exit(1)
+        print("ERROR: The path",os.path.abspath(path),"doesn't exist!")
+        return False
+    return True
 
 def createDir(path): 
     if not os.path.exists(path):
         os.mkdir(path)
         
-def mergeGrayGradients(blue, green, red):
-    stretched_blue = imf.linearStretch(blue)
-    stretched_green = imf.linearStretch(green)
-    stretched_red = imf.linearStretch(red)
-    m = cv2.merge((stretched_blue, stretched_green, stretched_red))
-    return cv2.fastNlMeansDenoisingColored(m, None, 4, 4, 7, 21)
+def rgbStretchHandler(rgb_path, photoname):
+    rgbname = "rgb_" + photoname
+    if rgbname not in os.listdir(rgb_path):
+        rgb_photo = imf.rgbStretch(photoname)
+        cv2.imwrite(rgb_path + rgbname, rgb_photo)
 
 def linearStretchHandler(gray_path, contrast_path, photoname):
     grayname = 'gray_' + photoname
@@ -108,9 +130,12 @@ def main():
         photos_path = sys.argv[1]
         applyLinearStretching(photos_path)
         
-    elif len(sys.argv) == 3 and "--pseudocolor" in sys.argv:
+    elif len(sys.argv) == 3:
         photos_path = sys.argv[2]
-        applyPseudoColor(photos_path)
+        if "--pseudocolor" in sys.argv:
+            applyPseudoColor(photos_path)
+        elif "--rgbstretch" in sys.argv:
+            applyMergeStretch(photos_path)
         
 
 if __name__ == '__main__':
