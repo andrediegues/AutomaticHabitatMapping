@@ -49,21 +49,31 @@ def createHash(img, bot, top):
     return hashmap
 
 def linearStretch(img):
-    bot1percent = numpy.percentile(img.ravel(), 1)
-    top99percent = numpy.percentile(img.ravel(), 99)
-    hashmap = createHash(img, bot1percent, top99percent)
+    if min(img.ravel()) == 0:
+        bot = numpy.percentile(img.ravel(), 1)
+    else:
+        bot = min(img.ravel())
+    if max(img.ravel()) == 255:
+        top = numpy.percentile(img.ravel(), 99)
+    else:
+        top = max(img.ravel())
+        
+    hashmap = createHash(img, bot, top)
     img2 = img
     for i, j in it.product(range(img2.shape[0]), range(img2.shape[1])):
         img2[i,j] = hashmap[img2[i,j]]
-    return img2[150:840, 220:1140]
+    return img2
+
+def createROI(img):
+    return img[150:840, 220:1140]
 
 def powerStretch(img): # not so good but worth a try
     img2 = img
     img2 = img2.astype(numpy.float)
-    c = (img2.max()) / (img2.max()**(0.5))
+    c = (img2.max()) / (img2.max()**(2))
     for i in range(0,img2.shape[0]-1):
         for j in range(0,img2.shape[1]-1):
-            img2[i,j] = numpy.int(c*img2[i,j]**(0.5))
+            img2[i,j] = numpy.int(c*img2[i,j]**(2))
 
     img2 = img2.astype(numpy.uint8)
     return img2
@@ -78,4 +88,4 @@ def rgbStretch(imgname):
     stretched_green = linearStretch(greenfilter(imgname, img))
     stretched_red = linearStretch(redfilter(imgname, img))
     m = cv2.merge((stretched_blue, stretched_green, stretched_red))
-    return cv2.fastNlMeansDenoisingColored(m, None, 4, 4, 7, 21)
+    return m
