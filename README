@@ -1,4 +1,6 @@
-#### README #### 
+* README * 
+
+This is the repository of the development of the MsC thesis: Automatic Habitat Mapping using Machine Learning. This repository contains programs that use Computer Vision techniques to deal with image enhancement and image noise in photos and sidescan sonar images. It may also contain some programs that handle the images in a file system. In the future will have the implementation of the ML predictive model (first approach will be CNNs).   
 
 This program can be used to retrieve the photos from a ImagePositions.csv file in which you want the photos with roll and pitch to 7.2º 
 and the altitude limits are between 1.5 and 3 meters. These values can be changed within the execution of the program.
