@@ -1,5 +1,8 @@
 # README
 
+
+## About
+
 This is the repository of the development of the **MsC thesis: Automatic Habitat Mapping using Machine Learning**. This repository contains programs that use Computer Vision techniques to deal with image enhancement and image noise in photos and sidescan sonar images. It may also contain some programs that handle the images in a file system. In the future will have the implementation of the ML predictive model (first approach will be CNNs).   
 
 
@@ -15,7 +18,7 @@ Then use pip3 (or conda if you use anaconda) to install the modules numpy and op
     sudo pip3 install opencv-python numpy
 
 
-## Compiling
+## Running
 
 Just run the program using python3 (as you would normally do) in the terminal:
 
