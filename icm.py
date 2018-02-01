@@ -5,6 +5,9 @@ Created on Wed Jan 31 10:04:46 2018
 
 @author: diegues
 """
+
+# final version of this transformation is in imageFilters.py
+
 from matplotlib import pyplot as plt
 import imageFilters as imf
 import numpy as np
@@ -44,34 +47,25 @@ def linearContrastStretchingProcessing(img):
 def main():
     imgpath = sys.argv[1]
     img = cv2.imread(imgpath)
-    blue = img[:,:,0]
-    green = img[:,:,1]
-    red = img[:,:,2]
-    #plt.figure(figsize=(16,12))
-    #plt.subplot(2,2,3)
-    #color = ('b', 'g', 'r')
-    #for i,col in enumerate(color):
-    #    histr = cv2.calcHist([img],[i],None,[256],[0,256])
-    #    plt.plot(histr,color = col)
-    #    plt.xlim([0,256])
+    rgbcs = imf.rgbStretch(imgpath)
     
-    bluecs = linearContrastStretchingProcessing(blue)
-    redcs = linearContrastStretchingProcessing(red)
-    greencs = linearContrastStretchingProcessing(green)
-    rgbimg = cv2.merge((bluecs, greencs, redcs))
+    plt.figure(figsize=(24,12))
+    plt.subplot(2,3,4)
+    color = ('b', 'g', 'r')
+    for i,col in enumerate(color):
+        histr = cv2.calcHist([img],[i],None,[256],[0,256])
+        plt.plot(histr,color = col)
+        plt.xlim([0,256])    
     
-    
-    #plt.subplot(2,2,4)
-    #for i,col in enumerate(color):
-    #    histr2 = cv2.calcHist([rgbimg],[i],None,[256],[0,256])
-    #    plt.plot(histr2,color = col)
-    #    plt.xlim([0,256])
+    plt.subplot(2,3,5)
+    for i,col in enumerate(color):
+        histr2 = cv2.calcHist([rgbcs],[i],None,[256],[0,256])
+        plt.plot(histr2,color = col)
+        plt.xlim([0,256])
         
-    #plt.subplot(221), plt.imshow(plt.imread(imgpath)), plt.axis('off')
-    #plt.subplot(222), plt.imshow(cv2.cvtColor(rgbimg, cv2.COLOR_RGB2BGR)), plt.axis('off')
-    #plt.savefig('histogram_differences.png')
+    plt.subplot(231), plt.imshow(plt.imread(imgpath)), plt.axis('off')
     
-    hlsimg = cv2.cvtColor(rgbimg, cv2.COLOR_RGB2HLS)
+    hlsimg = cv2.cvtColor(rgbcs, cv2.COLOR_RGB2HLS)
     #cv2.imshow("RGB image", rgbimg)
     #cv2.imshow("HLS image", hlsimg)
     #cv2.waitKey()
@@ -82,16 +76,24 @@ def main():
     lcs = imf.linearStretch(light)
     scs = imf.linearStretch(saturation)
     
-    plt.subplot(121)
-    hist = cv2.calcHist([saturation], [0],None, [256], [0,256])
-    plt.plot(hist)
-    plt.subplot(122)
-    h2 = cv2.calcHist([lcs],[0], None, [256], [0,256])
-    plt.plot(h2)
+    #plt.subplot(121)
+    #hist = cv2.calcHist([saturation], [0],None, [256], [0,256])
+    #plt.plot(hist)
+    #plt.subplot(122)
+    #h2 = cv2.calcHist([lcs],[0], None, [256], [0,256])
+    #plt.plot(h2)
     #plt.show()
     
     newhls = cv2.merge((hue,lcs,scs))
     readyRGB = cv2.cvtColor(newhls, cv2.COLOR_HLS2RGB)
+    plt.subplot(2,3,6)
+    for i,col in enumerate(color):
+        histr2 = cv2.calcHist([readyRGB],[i],None,[256],[0,256])
+        plt.plot(histr2,color = col)
+        plt.xlim([0,256])
+    plt.subplot(232), plt.imshow(cv2.cvtColor(rgbcs, cv2.COLOR_RGB2BGR)), plt.axis('off')
+    plt.subplot(233), plt.imshow(cv2.cvtColor(readyRGB, cv2.COLOR_RGB2BGR)), plt.axis('off')
+    #plt.savefig('histogram_differences.png')
     
     #cv2.imshow("new hls image", newhls)
     cv2.imshow("done image", readyRGB)

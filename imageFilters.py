@@ -89,3 +89,17 @@ def rgbStretch(imgname):
     stretched_red = linearStretch(redfilter(imgname, img))
     m = cv2.merge((stretched_blue, stretched_green, stretched_red))
     return m
+
+def integratedColorModel(imgname):
+    rgbcs = rgbStretch(imgname)
+    hlsimg = cv2.cvtColor(rgbcs, cv2.COLOR_RGB2HLS)    
+    hue = hlsimg[:,:,0]
+    light = hlsimg[:,:,1]
+    saturation = hlsimg[:,:,2]
+    lightcs = linearStretch(light)
+    saturationcs = linearStretch(saturation)
+    hlscs = cv2.merge((hue,lightcs,saturationcs))
+    imc = cv2.cvtColor(hlscs, cv2.COLOR_HLS2RGB)
+   
+    return imc
+
