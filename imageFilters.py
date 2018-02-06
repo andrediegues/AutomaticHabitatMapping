@@ -90,6 +90,37 @@ def rgbStretch(imgname):
     m = cv2.merge((stretched_blue, stretched_green, stretched_red))
     return m
 
+def findmax(img):
+    maxpixel = [0,0,0]
+    for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
+        if sum(img[i,j]) > sum(maxpixel):
+            maxpixel = img[i,j]
+            
+    return maxpixel
+
+def rescale(pixel, white):
+    pixel[0] *= white[0]
+    if pixel[0] > 255:
+        pixel[0] = 255
+    
+    pixel[1] *= white[1]
+    if pixel[1] > 255:
+        pixel[1] = 255
+    
+    pixel[2] *= white[2]
+    if pixel[2] > 255:
+        pixel[2] = 255
+
+    return pixel
+
+def whitebalance(img):
+    newwhite = findmax(img)
+    scale = [255 / e for e in newwhite]
+    newimg = img
+    for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
+        newimg[i,j] = rescale(img[i,j],scale)
+    return newimg
+
 def integratedColorModel(imgname):
     rgbcs = rgbStretch(imgname)
     hlsimg = cv2.cvtColor(rgbcs, cv2.COLOR_RGB2HLS)    

@@ -11,62 +11,91 @@ import cv2
 import imageFilters as imf
 import itertools as it
 import math
+import numpy as np
 from scipy.stats import rayleigh
+from matplotlib import pyplot as plt
 
-def splitHist(img):
-    rmin = min(img.ravel())
-    rmax = max(img.ravel())
+def splitHist(hist):
+    rmin = hist.argmin()
+    rmax = hist.argmax()
     rmid = math.floor((rmax - rmin) / 2 + rmin)
-    pixels = list(set(sorted(img.ravel())))
-    l = pixels[:len(pixels) - pixels[::-1].index(rmid)]
-    r = pixels[len(pixels) - pixels[::-1].index(rmid):]
+    #print(rmin, rmax, rmid, len(hist))
+    l = hist[:rmid]
+    r = hist[rmid:]
+    #print(l)
+    #print(r)
     return l, r
 
-def rayleighStretch(pixels):
+def rayleighStretch(hist):
     h = {}
-    bot = min(pixels)
-    top = max(pixels)
-    for pixel in pixels:
-        val = rayleigh.pdf((255 * ((pixel - bot) / (top - bot))))
-        h[pixel] = val
-        print(val)
+    bot = hist.argmin()
+    if bot == 0:
+        bot = np.percentile(hist, 1)
+    top = hist.argmax()
+    if top == 255:
+        top = np.percentile(hist, 99)
+    newhist = hist
+    #print(bot, top)    
+    for pixel in newhist:
+        #print(pixel[0])
+        if pixel[0] < bot:
+            pixel[0] = 0
+        elif pixel[0] > top:
+            pixel[0] = 255
+        else:
+            pixel[0] = (255 * ((pixel[0] - bot) / (top - bot)))
+#        print(pixel)
+    #print(newhist)
+    val = rayleigh.pdf(newhist, scale=256)
+    print(val)
     return h
 
-def merge(img, l, r):
-    imgrs = img
+def average(img, l, r):
+    newimg = img
     for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
-        if img[i,j] in l:
-            imgrs[i,j] = l[img[i,j]]
-        elif img[i,j] in r:
-            imgrs[i,j] = r[img[i,j]]            
-    return imgrs
+        newimg[i,j] = (r[i,j] - l[i,j]) / 2 + l[i,j]
+    return newimg
 
 def main():
     imgname = sys.argv[1]
-    img = cv2.imread(imgname)
+    img = cv2.imread(imgname)    
     b = imf.bluefilter(imgname)
     g = imf.greenfilter(imgname)
     r = imf.redfilter(imgname)
     
-    bl, br = splitHist(b)
-    gl, gr = splitHist(g)
-    rl, rr = splitHist(r)
+    bhist = cv2.calcHist([b], [0], None, [256], [0,256])
+    ghist = cv2.calcHist([g], [0], None, [256], [0,256])
+    rhist = cv2.calcHist([r], [0], None, [256], [0,256])
+    #print(bhist.argmin())
+    bl, br = splitHist(bhist)
+    gl, gr = splitHist(ghist)
+    rl, rr = splitHist(rhist)
     
     blrs = rayleighStretch(bl)
-    brrs = rayleighStretch(br)
-    glrs = rayleighStretch(gl)
-    grrs = rayleighStretch(gr)
-    rlrs = rayleighStretch(rl)
-    rrrs = rayleighStretch(rr)
+    #brrs = rayleighStretch(br)
+    plt.subplot(121)
+    plt.plot(bl)
+    plt.subplot(122)
+    plt.plot(br)
+    #plt.subplot(223)
+    #plt.plot(blrs)
+    #plt.subplot(224)
+    #plt.plot(brrs)
+    #plt.show()
     
-    brs = merge(b, blrs, brrs)
-    grs = merge(g, glrs, grrs)
-    rrs = merge(r, rlrs, rrrs)
+    #glrs = rayleighStretch(gl)
+    #grrs = rayleighStretch(gr)
+    #rlrs = rayleighStretch(rl)
+    #rrrs = rayleighStretch(rr)
     
-    imgcs = cv2.merge((brs, grs, rrs))
-    cv2.imshow("original",img)
-    cv2.imshow("rayleigh", imgcs)
-    cv2.waitKey()
+    #brs = average(b, blrs, brrs)
+    #grs = average(g, glrs, grrs)
+    #rrs = average(r, rlrs, rrrs)
+    
+    #imgcs = cv2.merge((brs, grs, rrs))
+    #cv2.imshow("original",img)
+    #cv2.imshow("rayleigh", imgcs)
+    #cv2.waitKey()
     
 if __name__ == '__main__':
     main()
