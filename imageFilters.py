@@ -7,7 +7,7 @@ Created on Mon Nov 13 15:49:11 2017
 """
 # tried numba but increased the processing time by almost a double of what was taking without it
 import cv2
-import numpy
+import numpy as np
 import itertools as it
 
 def grayscale(imgname):
@@ -50,11 +50,11 @@ def createHash(img, bot, top):
 
 def linearStretch(img):
     if min(img.ravel()) == 0:
-        bot = numpy.percentile(img.ravel(), 1)
+        bot = np.percentile(img.ravel(), 1)
     else:
         bot = min(img.ravel())
     if max(img.ravel()) == 255:
-        top = numpy.percentile(img.ravel(), 99)
+        top = np.percentile(img.ravel(), 99)
     else:
         top = max(img.ravel())
         
@@ -69,13 +69,13 @@ def createROI(img):
 
 def powerStretch(img): # not so good but worth a try
     img2 = img
-    img2 = img2.astype(numpy.float)
+    img2 = img2.astype(np.float)
     c = (img2.max()) / (img2.max()**(2))
     for i in range(0,img2.shape[0]-1):
         for j in range(0,img2.shape[1]-1):
-            img2[i,j] = numpy.int(c*img2[i,j]**(2))
+            img2[i,j] = np.int(c*img2[i,j]**(2))
 
-    img2 = img2.astype(numpy.uint8)
+    img2 = img2.astype(np.uint8)
     return img2
 
 def pseudocoloring(imgname):
@@ -91,46 +91,53 @@ def rgbStretch(imgname):
     return m
 
 def findmax(img):
-    maxpixel = [0,0,0]
+    maxpixel = img[0,0]
+    sumMaxPixel = sum(maxpixel)
     for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
-        if sum(img[i,j]) > sum(maxpixel):
+        sumPixel = sum(img[i,j])
+        if sumPixel > sumMaxPixel:
             maxpixel = img[i,j]
+            sumMaxPixel = sumPixel
             
     return maxpixel
 
 def rescale(pixel, white):
-    pixel[0] *= white[0]
-    if pixel[0] > 255:
-        pixel[0] = 255
-    
-    pixel[1] *= white[1]
-    if pixel[1] > 255:
-        pixel[1] = 255
-    
-    pixel[2] *= white[2]
-    if pixel[2] > 255:
-        pixel[2] = 255
+    val = pixel * white
+    if pixel * white > 255:
+        return 255 
+    return val
 
-    return pixel
-
-def whitebalance(img):
+def whitebalance(imgname):
+    img = cv2.imread(imgname)
     newwhite = findmax(img)
     scale = [255 / e for e in newwhite]
+    b = img[:,:,0]
+    g = img[:,:,1]
+    r = img[:,:,2]
+    hb = {}
+    hg = {}
+    hr = {}
+    for e in list(set(b.ravel())):
+        hb[e] = rescale(e, scale[0])
+    for e in list(set(g.ravel())):
+        hg[e] = rescale(e, scale[1])
+    for e in list(set(r.ravel())):
+        hr[e] = rescale(e, scale[2])
     newimg = img
     for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
-        newimg[i,j] = rescale(img[i,j],scale)
+        newimg[i,j] = np.array([hb[img[i,j][0]],hg[img[i,j][1]],hr[img[i,j][2]]])
     return newimg
 
 def integratedColorModel(imgname):
     rgbcs = rgbStretch(imgname)
-    hlsimg = cv2.cvtColor(rgbcs, cv2.COLOR_RGB2HLS)    
-    hue = hlsimg[:,:,0]
-    light = hlsimg[:,:,1]
-    saturation = hlsimg[:,:,2]
-    lightcs = linearStretch(light)
+    hsvimg = cv2.cvtColor(rgbcs, cv2.COLOR_RGB2HSV)    
+    hue = hsvimg[:,:,0]
+    saturation = hsvimg[:,:,1]
+    value = hsvimg[:,:,2]
+    valuecs = linearStretch(value)
     saturationcs = linearStretch(saturation)
-    hlscs = cv2.merge((hue,lightcs,saturationcs))
-    imc = cv2.cvtColor(hlscs, cv2.COLOR_HLS2RGB)
+    hlscs = cv2.merge((hue,saturationcs,valuecs))
+    imc = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
    
     return imc
 

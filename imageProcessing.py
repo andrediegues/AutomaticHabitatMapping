@@ -6,13 +6,13 @@ Created on Thu Nov  9 14:02:43 2017
 @author: diegues
 
 This is the main module. It contains some of the possible actions in order to process/transform an image (see options below). 
-If no option is provided, it applies the RGB constrast stretching of the images.
+If no option is provided, it applies the Integrated Color Model which uses RGB constrast stretching of the images plus stretching of the HSV model in the Saturation and Value channels.
 
 OPTIONS:
     -l (--linearstretch): Applies the linear stretching to the image. 
     -n (--nonlinearstretch): Returns the contrast stretch using a nonlinear function.
     -p (--pseudocolor): Applies the pseudocolor colormap of the images in the LinearStretching folder, If the folder doesn't exist this folder is generated.
-    
+    -r (--rgbstretch): Applies the linear contrast stretching to the RGB channels and merge them afterwards.
 """
 from functools import partial
 import os
@@ -85,6 +85,49 @@ def applyMergeStretch(photos_path):
     time1 = time.time()
     
     print("RGB stretching took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
+ 
+def applyWhiteBalance(photos_path):    
+    list_of_photos = os.listdir(os.getcwd())
+    wb_path = '../WhiteBalance/'
+    createDir(wb_path)
+    
+    pool = mp.Pool(processes = mp.cpu_count())
+    wb = partial(wbHandler, wb_path)
+    
+    print("White balancing photos...")
+    time0 = time.time()
+    pool.map(wb, list_of_photos)
+    time1 = time.time()   
+    print("Task took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
+    
+    return photos_path + wb_path
+
+def applyICM(photos_path):
+    list_of_photos = os.listdir(os.getcwd())
+    icm_path = '../ICM/'
+    createDir(icm_path)
+    
+    pool = mp.Pool(processes = mp.cpu_count())
+    icm = partial(icmHandler, icm_path)
+    
+    print("Applying ICM algorithm...")
+    time0 = time.time()
+    pool.map(icm, list_of_photos)
+    time1 = time.time() 
+    print("Task took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
+    
+def wbHandler(path, photoname):
+    wb_photoname = 'wb_' + photoname
+    if wb_photoname not in os.listdir(path):
+        wb_photo = imf.whitebalance(photoname)
+        cv2.imwrite(path + wb_photoname, wb_photo)
+        
+def icmHandler(path, photoname):
+    icm_photoname = 'icm_' + photoname
+    if icm_photoname not in os.listdir(path):
+        icm_photo = imf.integratedColorModel(photoname)
+        cv2.imwrite(path + icm_photoname, icm_photo)
+        
         
 def checkPath(path):
     if not os.path.exists(path):
@@ -134,20 +177,24 @@ def main():
         if not checkPath(photos_path):
             sys.exit(1) 
         os.chdir(photos_path)
-        applyMergeStretch(photos_path)
+        photos_path = applyWhiteBalance(photos_path)
+        applyICM(photos_path)
         
         
     elif len(sys.argv) == 3:
         photos_path = sys.argv[2]
+        os.chdir(photos_path)
+        photos_path = applyWhiteBalance(photos_path)
         if not checkPath(photos_path):
             sys.exit(1)
-        os.chdir(photos_path)
         if "--pseudocolor" in sys.argv or "-p" in sys.argv:
             applyPseudoColor(photos_path)
         elif "--linearstretch" in sys.argv or "-l" in sys.argv:
             applyLinearStretching(photos_path)
         elif "--nonlinearstretch" in sys.argv or "-n" in sys.argv:
             applyPowerStretching(photos_path)
+        elif '--rgbstretch' in sys.argv or '-r' in sys.argv:
+            applyMergeStretch(photos_path)
         
 
 if __name__ == '__main__':
