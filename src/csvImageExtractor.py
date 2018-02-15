@@ -11,7 +11,7 @@ def getWantedRowsFromCSVFile(rows, desiredPitch, desiredRoll, bottomLimAltitude,
         roll = float(row[6])
         altitude = float(row[4])
         if math.fabs(pitch) <= desiredPitch and math.fabs(roll) <= desiredRoll and math.fabs(altitude) >= bottomLimAltitude and math.fabs(altitude) <= upperLimAltitude:
-            wantedRows.append(row[0])
+            wantedRows.append(row)
     return wantedRows
 
 def copyWantedRowFilesToMRADir(wantedRows, path):
@@ -37,6 +37,14 @@ def copyWantedRowFilesToMRADir(wantedRows, path):
                     else:
                         print("The file", f, "already exists in the destiny directory", "\t",i, "/", len(wantedRows))
     return newDir
+
+def writePositionsToFile(dst, rows, header):
+    file = open(dst + '/../positions.csv', 'w')
+    file.write(",".join(header[:3]) + "\n")
+    [file.write(','.join(r[:3]) + '\n') for r in rows]
+    file.close()
+    
+    
     
 def main():
     if len(sys.argv) < 2:
@@ -62,7 +70,11 @@ def main():
     
     wantedRows = getWantedRowsFromCSVFile(rows, desiredPitch, desiredRoll, bottomLimAltitude, upperLimAltitude)
     
-    newDir = copyWantedRowFilesToMRADir(wantedRows, filepath)
+    timestamps = [r[0] for r in wantedRows]
+    newDir = copyWantedRowFilesToMRADir(timestamps, filepath)
+    
+    writePositionsToFile(newDir, wantedRows, rows[0])
+    
     print("File filtering resulted in " + str(len(wantedRows)) + " rows and " + str(round(len(wantedRows) / len(rows) * 100,2)) + " % of data from the original dataset and were saved in the", newDir, "directory.")    
     print("exiting...")
     sys.exit(0)
