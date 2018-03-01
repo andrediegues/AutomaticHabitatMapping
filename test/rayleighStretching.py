@@ -93,9 +93,9 @@ def main():
     #rrs = average(r, rlrs, rrrs)
     
     #imgcs = cv2.merge((brs, grs, rrs))
-    #cv2.imshow("original",img)
-    #cv2.imshow("rayleigh", imgcs)
-    #cv2.waitKey()
+    cv2.imshow("original",img)
+    cv2.imshow("rayleigh", imgcs)
+    cv2.waitKey()
     
 if __name__ == '__main__':
     main()
