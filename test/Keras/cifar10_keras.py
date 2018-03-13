@@ -22,25 +22,20 @@ y_test = to_categorical(y_test, 10)
 
 model = Sequential()
 
-model.add(Conv2D(16,(3,3),padding='same', input_shape = (32,32,3), activation='relu'))
-model.add(MaxPool2D((2,2)))
-model.add(Dropout(.25))
-
-model.add(Conv2D(64,(3,3),padding='same', activation='relu'))
+model.add(Conv2D(64,(3,3),padding='same', input_shape = (32,32,3), activation='relu'))
 model.add(MaxPool2D((2,2)))
 model.add(Dropout(.5))
 
 model.add(Flatten())
 
-model.add(Dense(256, activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(10, activation='sigmoid'))
 
 model.summary()
 
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics = ['accuracy'])
+model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics = ['accuracy'])
 
-model.fit(x = x_train, y = y_train, epochs = 40)
+model.fit(x = x_train, y = y_train, epochs = 10)
+p = model.predict(x_test)
 
 score = model.evaluate(x = x_test, y = y_test)
 model.metrics_names
