@@ -28,9 +28,9 @@ model.add(Dropout(0.5))
 
 model.add(Flatten())
 model.add(Dense(256, activation='relu'))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(10, activation='sigmoid'))
 model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
+              loss='binary_crossentropy',
               metrics=['accuracy'])
 
 model.fit(mnist_train, train_labels, epochs=50, batch_size=32)
@@ -38,13 +38,14 @@ model.fit(mnist_train, train_labels, epochs=50, batch_size=32)
 
 model.summary()
 
-#test_labels = (test_labels > .5).astyp
+test_labels = (test_labels > .5).astype('float32')
 
-#p = model.predict(mnist_test)
-#p = (p > .5)
-#from sklearn.metrics import confusion_matrix
-#cm = confusion_matrix(test_labels.y_pred, p)
-
+p = model.predict(mnist_test)
+p = (p > .2)
+p
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(test_labels.argmax(axis=1), p.argmax(axis=1))
+sum(cm.diagonal())/len(mnist_test)
 score = model.evaluate(mnist_test, test_labels)
 print(score) 
 # [0.026451086297453252, 0.99360000000000004]
