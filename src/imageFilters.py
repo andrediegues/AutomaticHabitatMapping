@@ -144,7 +144,8 @@ def whitebalance(imgname):
     return newimg
 
 def integratedColorModel(imgname):
-    rgbcs = rgbStretch(imgname)
+    #testar fazer o rgb stretch depois do hsv stretch
+    #rgbcs = rgbStretch(imgname)
     hsvimg = cv2.cvtColor(cv2.imread(imgname), cv2.COLOR_RGB2HSV)    
     hue = hsvimg[:,:,0]
     saturation = hsvimg[:,:,1]
