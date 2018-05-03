@@ -7,7 +7,8 @@ Created on Wed Jan 31 10:04:46 2018
 """
 
 # final version of this transformation is in imageFilters.py
-
+import sys
+sys.path.append("../src/")
 from matplotlib import pyplot as plt
 import imageFilters as imf
 import numpy as np
@@ -47,7 +48,8 @@ def linearContrastStretchingProcessing(img):
 def main():
     imgpath = sys.argv[1]
     img = cv2.imread(imgpath)
-    rgbcs = imf.rgbStretch(imgpath)
+    #rgbcs = imf.rgbStretch(imgpath)
+    hequalization = cv2.equalizeHist(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
     
     plt.figure(figsize=(24,12))
     plt.subplot(2,3,4)
@@ -59,7 +61,7 @@ def main():
     
     plt.subplot(2,3,5)
     for i,col in enumerate(color):
-        histr2 = cv2.calcHist([rgbcs],[i],None,[256],[0,256])
+        histr2 = cv2.calcHist([hequalization],[i],None,[256],[0,256])
         plt.plot(histr2,color = col)
         plt.xlim([0,256])
         
@@ -91,13 +93,13 @@ def main():
         histr2 = cv2.calcHist([readyRGB],[i],None,[256],[0,256])
         plt.plot(histr2,color = col)
         plt.xlim([0,256])
-    plt.subplot(232), plt.imshow(cv2.cvtColor(rgbcs, cv2.COLOR_RGB2BGR)), plt.axis('off')
+    plt.subplot(232), plt.imshow(cv2.cvtColor(hequalization, cv2.COLOR_RGB2BGR)), plt.axis('off')
     plt.subplot(233), plt.imshow(cv2.cvtColor(readyRGB, cv2.COLOR_RGB2BGR)), plt.axis('off')
-    #plt.savefig('histogram_differences.png')
+    plt.savefig('plot.png')
     
     #cv2.imshow("new hls image", newhls)
-    cv2.imshow("done image", readyRGB)
-    cv2.waitKey()
+    #cv2.imshow("done image", readyRGB)
+    #cv2.waitKey()
 
 # o azul como e predominante fazemos contrast stretching ao verde e vermelho para estar a mesma escala pelos limites do azul
 # vemos como fica e avancamos

@@ -100,7 +100,7 @@ def applyWhiteBalance(photos_path):
     time1 = time.time()   
     print("Task took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
     
-    return photos_path + wb_path
+    return os.path.abspath(wb_path)
 
 def applyICM(photos_path):
     list_of_photos = os.listdir(os.getcwd())

@@ -84,22 +84,37 @@ def pseudocoloring(imgname):
 
 def rgbStretch(imgname):
     img = cv2.imread(imgname)
-    stretched_blue = linearStretch(bluefilter(imgname, img))
-    stretched_green = linearStretch(greenfilter(imgname, img))
-    stretched_red = linearStretch(redfilter(imgname, img))
-    m = cv2.merge((stretched_blue, stretched_green, stretched_red))
+    hsvimg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)    
+    hue = hsvimg[:,:,0]
+    saturation = hsvimg[:,:,1]
+    value = hsvimg[:,:,2]
+    valuecs = linearStretch(value)
+    saturationcs = linearStretch(saturation)
+    hlscs = cv2.merge((hue,saturationcs,valuecs))
+    m = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
+    #stretched_blue = linearStretch(bluefilter(imgname, img))
+    #stretched_green = linearStretch(greenfilter(imgname, img))
+    #stretched_red = linearStretch(redfilter(imgname, img))
+    #m = cv2.merge((stretched_blue, stretched_green, stretched_red))
     return m
 
 def findmax(img):
     maxpixel = img[0,0]
-    sumMaxPixel = sum(maxpixel)
+    maxBlue = maxpixel[0]
+    maxGreen = maxpixel[1]
+    maxRed = maxpixel[2]
     for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
-        sumPixel = sum(img[i,j])
-        if sumPixel > sumMaxPixel:
-            maxpixel = img[i,j]
-            sumMaxPixel = sumPixel
+        bluePixel = img[i,j,0]
+        greenPixel = img[i,j,1]
+        redPixel = img[i,j,2]
+        if bluePixel > maxBlue:
+            maxBlue = img[i,j,0]
+        if greenPixel > maxGreen:
+            maxGreen = img[i,j,1]
+        if redPixel > maxRed:
+            maxRed = img[i,j,2]
             
-    return maxpixel
+    return [maxBlue,maxGreen,maxRed]
 
 def rescale(pixel, white):
     val = pixel * white
@@ -130,7 +145,7 @@ def whitebalance(imgname):
 
 def integratedColorModel(imgname):
     rgbcs = rgbStretch(imgname)
-    hsvimg = cv2.cvtColor(rgbcs, cv2.COLOR_RGB2HSV)    
+    hsvimg = cv2.cvtColor(cv2.imread(imgname), cv2.COLOR_RGB2HSV)    
     hue = hsvimg[:,:,0]
     saturation = hsvimg[:,:,1]
     value = hsvimg[:,:,2]

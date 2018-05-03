@@ -33,7 +33,7 @@ model.compile(optimizer='adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(mnist_train, train_labels, epochs=50, batch_size=32)
+model.fit(mnist_train, train_labels, epochs=10, batch_size=64)
 # 35 epochs e suficiente o treino converge para 99.4 %
 
 model.summary()
