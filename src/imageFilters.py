@@ -84,18 +84,18 @@ def pseudocoloring(imgname):
 
 def rgbStretch(imgname):
     img = cv2.imread(imgname)
-    hsvimg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)    
-    hue = hsvimg[:,:,0]
-    saturation = hsvimg[:,:,1]
-    value = hsvimg[:,:,2]
-    valuecs = linearStretch(value)
-    saturationcs = linearStretch(saturation)
-    hlscs = cv2.merge((hue,saturationcs,valuecs))
-    m = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
-    #stretched_blue = linearStretch(bluefilter(imgname, img))
-    #stretched_green = linearStretch(greenfilter(imgname, img))
-    #stretched_red = linearStretch(redfilter(imgname, img))
-    #m = cv2.merge((stretched_blue, stretched_green, stretched_red))
+    #hsvimg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)    
+    #hue = hsvimg[:,:,0]
+    #saturation = hsvimg[:,:,1]
+    #value = hsvimg[:,:,2]
+    #valuecs = linearStretch(value)
+    #saturationcs = linearStretch(saturation)
+    #hlscs = cv2.merge((hue,saturationcs,valuecs))
+    #m = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
+    stretched_blue = linearStretch(bluefilter(imgname, img))
+    stretched_green = linearStretch(greenfilter(imgname, img))
+    stretched_red = linearStretch(redfilter(imgname, img))
+    m = cv2.merge((stretched_blue, stretched_green, stretched_red))
     return m
 
 def findmax(img):
@@ -144,9 +144,9 @@ def whitebalance(imgname):
     return newimg
 
 def integratedColorModel(imgname):
-    #testar fazer o rgb stretch depois do hsv stretch
     #rgbcs = rgbStretch(imgname)
-    hsvimg = cv2.cvtColor(cv2.imread(imgname), cv2.COLOR_RGB2HSV)    
+    img = cv2.imread(imgname)
+    hsvimg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)    
     hue = hsvimg[:,:,0]
     saturation = hsvimg[:,:,1]
     value = hsvimg[:,:,2]

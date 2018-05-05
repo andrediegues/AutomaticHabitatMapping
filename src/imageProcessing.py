@@ -39,7 +39,7 @@ def applyLinearStretching(photos_path):
 
 def applyPowerStretching(photos_path):
     list_of_photos = os.listdir(os.getcwd())
-    nonlinear_path = '../NonLinearStretching/'
+    nonlinear_path = '../PowerLawTransformStretching/'
     createDir(nonlinear_path)
     
     pool = mp.Pool(processes=mp.cpu_count())
@@ -140,11 +140,17 @@ def createDir(path):
         os.mkdir(path)
         
 def nonLinearStretchHandler(contrast_path, photoname):
-    gray_photo = imf.grayscale(photoname)
-    pow_stretch_name = 'nl_' + photoname
+    
+    im = cv2.imread(photoname)
+    pow_stretch_name = 'plt_' + photoname
     if pow_stretch_name not in os.listdir(contrast_path):
-        pow_stretch_gray = imf.powerStretch(gray_photo)
-        cv2.imwrite(contrast_path + pow_stretch_name, pow_stretch_gray)
+        im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
+        im = im/255.0
+        im_power_law_transformation = cv2.pow(im,3)
+        im_power_law_transformation *= 255 
+        im_power_law_transformation = im_power_law_transformation.astype('uint8')
+        im_power_law_transformation = cv2.cvtColor(im_power_law_transformation,cv2.COLOR_BGR2RGB)
+        cv2.imwrite(contrast_path + pow_stretch_name, im_power_law_transformation)
 
 
 def rgbStretchHandler(rgb_path, photoname):
@@ -178,6 +184,7 @@ def main():
             sys.exit(1) 
         os.chdir(photos_path)
         photos_path = applyWhiteBalance(photos_path)
+        os.chdir(photos_path)
         applyICM(photos_path)
         
         
@@ -185,8 +192,9 @@ def main():
         photos_path = sys.argv[2]
         os.chdir(photos_path)
         photos_path = applyWhiteBalance(photos_path)
-        if not checkPath(photos_path):
-            sys.exit(1)
+        os.chdir(photos_path)
+        #if not checkPath(photos_path):
+         #   sys.exit(1)
         if "--pseudocolor" in sys.argv or "-p" in sys.argv:
             applyPseudoColor(photos_path)
         elif "--linearstretch" in sys.argv or "-l" in sys.argv:

@@ -14,11 +14,11 @@ import sys
 
 def main():
     os.chdir(sys.argv[1])
-    data = pd.read_csv("positions.csv", names=['filename', 'timestamp', 'longitude', 'latitude'])[1:]
-    folderpath = "Original/"
+    data = pd.read_csv("positions.csv", names=['filename', 'timestamp', 'longitude', 'latitude', 'altitude', 'roll', 'pitch', 'depth'])[1:]
+    folderpath = "PowerLawTransformStretching/"
     entropy = []
     for imagename in data['filename']:
-        e = shannon_entropy(imread(folderpath + imagename + '.jpg'))
+        e = shannon_entropy(imread(folderpath + "plt_wb_" + imagename))
         if e < 0:
             e = 0
         entropy.append(e)
