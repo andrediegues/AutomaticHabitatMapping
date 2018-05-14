@@ -26,4 +26,4 @@ for file in namesToCopy['filename']:
     if os.path.isfile(folder + 'plt_wb_' + file):
         copyfile(folder + 'plt_wb_' + file, new_folder + '/' + file)
      
-namesToCopy.to_csv(new_folder + '/' + logpath.split('/')[-1] + '.csv')
+namesToCopy.to_csv(new_folder + '/' + logpath.split('/')[-1] + '.csv', index = False)

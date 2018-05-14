@@ -23,7 +23,7 @@ def main():
             e = 0
         entropy.append(e)
     data['entropy'] = entropy
-    data.to_csv("positions.csv")
+    data.to_csv("positions.csv", index=False)
     
 if __name__ == '__main__':
     main()
