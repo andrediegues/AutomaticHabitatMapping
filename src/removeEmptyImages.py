@@ -16,7 +16,7 @@ logpath = os.path.abspath(sys.argv[1])
 os.chdir(logpath)
 new_folder = logpath + '/' + logpath.split('/')[-1]
 value = sys.argv[2]
-data = pd.read_csv('mra/FilteredPhotos/positions.csv', names=['filename', 'timestamp', 'longitude', 'latitude', 'altitude', 'roll', 'pitch', 'depth', 'entropy'])[1:]
+data = pd.read_csv('mra/FilteredPhotos/positions.csv', names=['filename', 'timestamp', 'latitude', 'longitude', 'altitude', 'roll', 'pitch', 'depth', 'entropy'])[1:]
 #print(data['entropy'].astype(float))
 #print(data.entropy.astype(float) <= float(value))
 namesToCopy = data[data['entropy'].astype(float) <= float(value)]

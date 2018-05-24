@@ -14,7 +14,7 @@ import sys
 
 def main():
     os.chdir(sys.argv[1])
-    data = pd.read_csv("positions.csv", names=['filename', 'timestamp', 'longitude', 'latitude', 'altitude', 'roll', 'pitch', 'depth'])[1:]
+    data = pd.read_csv("positions.csv", names=['filename', 'timestamp', 'latitude', 'longitude', 'altitude', 'roll', 'pitch', 'depth'])[1:]
     folderpath = "PowerLawTransformStretching/"
     entropy = []
     for imagename in data['filename']:
