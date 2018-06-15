@@ -8,7 +8,6 @@ Created on Thu Jun 14 13:52:52 2018
 
 import pandas as pd
 import os
-from sklearn.model_selection import train_test_split
 
 path = "/home/diegues/Desktop/ProcessedImages/"
 
@@ -31,7 +30,7 @@ for folder in [f for f in os.listdir(path) if os.path.isdir(path+f)]:
                           names=['filename', 'date', 'longitude', 'latitude', 'depth', 'EunisCode', 'EunisName', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 
                                  'species', 'AphiaID'])[1:]
     targets = targets.drop(['date', 'longitude', 'latitude'], axis=1)
-    targets = targets.drop_duplicates(subset = 'filename')
+    #targets = targets.drop_duplicates(subset = 'filename')
     join_dfs = pd.merge(data, targets, on='filename', how='outer')
     non_empty_targets = join_dfs[join_dfs['EunisCode'].notnull()]
     labeled_data = labeled_data.append(non_empty_targets)
@@ -43,7 +42,3 @@ for c in classes:
     classesfile.write(c + "\n")
 classesfile.close()
 
-# to the models
-train, test = train_test_split(labeled_data, test_size = 0.3)
-train.to_csv(path + "train.csv", index = False)
-test.to_csv(path + "test.csv", index = False)
