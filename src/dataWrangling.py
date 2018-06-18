@@ -30,13 +30,12 @@ for folder in [f for f in os.listdir(path) if os.path.isdir(path+f)]:
                           names=['filename', 'date', 'longitude', 'latitude', 'depth', 'EunisCode', 'EunisName', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 
                                  'species', 'AphiaID'])[1:]
     targets = targets.drop(['date', 'longitude', 'latitude'], axis=1)
-    #targets = targets.drop_duplicates(subset = 'filename')
     join_dfs = pd.merge(data, targets, on='filename', how='outer')
     non_empty_targets = join_dfs[join_dfs['EunisCode'].notnull()]
     labeled_data = labeled_data.append(non_empty_targets)
     
 labeled_data.to_csv(path + "labeled_data.csv", index = False)
-classes = labeled_data.level3.unique()
+classes = labeled_data.EunisCode.unique()
 classesfile = open(path + "classes.txt", "w")
 for c in classes:
     classesfile.write(c + "\n")
