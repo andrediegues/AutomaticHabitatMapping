@@ -15,6 +15,9 @@ from sklearn import svm
 from sklearn.metrics import accuracy_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
+import cv2
+import numpy as np
+import os
 
 def printWrongPreds(preds, targets):
     df = pd.DataFrame()
@@ -104,5 +107,44 @@ failed_nn = printWrongPreds(predictions_nn, test_Y_cat)
 # Image Classification
 
 ## Support Vector Machines
+
+classes = np.sort(np.array(Y_cat['EunisCode'].unique()))
+class_map = dict((k,v) for (k, v) in zip(classes, [np.float32(i) for i in range(0,len(classes))]))
+path_to_imgs = '/home/diegues/Desktop/ProcessedImages/LabeledData/'
+
+X_train = []
+X_test = []
+y_train = []
+y_test = []
+i=0
+for file in os.listdir(path_to_imgs):
+    i = i + 1
+    print(i)
+    img = cv2.resize(cv2.imread(path_to_imgs + file, 0),(200,150))
+    xarray_img = np.squeeze(np.array(img).astype(np.float32))
+    m, v = cv2.PCACompute(xarray_img, mean = None)
+    array = np.array(v)
+    flat_array = array.ravel()
+    if file in train_X_cat.index:
+        X_train.append(flat_array)
+        y_train.append(class_map[train_Y_cat['EunisCode'].loc[file]])
+        
+    elif file in test_X_cat.index:
+        X_test.append(flat_array)
+        y_test.append(class_map[test_Y_cat['EunisCode'].loc[file]])
+
+X_train = np.float32(X_train)
+X_test = np.float32(X_test)
+y_train = np.float32(y_train)
+y_test = np.float32(y_test)
+
+img_svm = cv2.ml.SVM_create()
+img_svm.setKernel(cv2.ml.SVM_LINEAR)
+img_svm.setType(cv2.ml.SVM_C_SVC)
+img_svm.setC(2.67)
+img_svm.setGamma(5.383)
+img_svm.train(X_train, cv2.ml.ROW_SAMPLE, y_train)
+        
+result = img_svm.predict(y_train)[1]
 
 ## Convolutional Neural Networks
