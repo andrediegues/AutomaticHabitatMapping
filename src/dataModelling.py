@@ -18,6 +18,9 @@ from sklearn.preprocessing import StandardScaler
 import cv2
 import numpy as np
 import os
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Flatten
+from sklearn.metrics import confusion_matrix
 
 def printWrongPreds(preds, targets):
     df = pd.DataFrame()
@@ -87,27 +90,52 @@ svm = svm.SVC()
 svm.fit(train_X_cat, train_Y_cat.values.ravel())
 preds_svm = svm.predict(test_X_cat)
 print('SVM:\t',accuracy_score(test_Y_cat, preds_svm))
-failed_svm = printWrongPreds(preds_svm, test_Y_cat)
+#failed_svm = printWrongPreds(preds_svm, test_Y_cat)
 
 
 # Neural Networks
+## sklearn
+
 scaler = StandardScaler()
 scaler.fit(train_X_cat)
 
 train_X_scaled = scaler.transform(train_X_cat)
 test_X_scaled = scaler.transform(test_X_cat)
-
-mlp = MLPClassifier(hidden_layer_sizes=(64,64,128))
+"""
+mlp = MLPClassifier(hidden_layer_sizes=(4096,4096,1000))
 mlp.fit(train_X_scaled,train_Y_cat.values.ravel())
 
 predictions_nn = mlp.predict(test_X_scaled)
-print('NN:\t',accuracy_score(test_Y_cat,predictions_nn))
+print('sklearn NN:\t',accuracy_score(test_Y_cat,predictions_nn))
 failed_nn = printWrongPreds(predictions_nn, test_Y_cat)
+"""
+## keras
 
+model = Sequential()
+model.add(Dense(4096, activation='relu', input_dim=4))
+model.add(Dropout(0.2))
+model.add(Dense(4096, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(1000, activation='relu'))
+model.add(Dropout(0.8))
+model.add(Dense(13, activation='sigmoid')) 
+
+model.compile(loss='binary_crossentropy',
+              optimizer='adam',
+              metrics=['accuracy'])
+
+model.fit(train_X_scaled, train_Y_ohe, epochs=10,validation_data=(test_X_scaled,test_Y_ohe))
+predskeras_nn = pd.DataFrame(model.predict(test_X_scaled))
+predskeras_nn.columns = test_Y_ohe.columns.values
+score = model.evaluate(test_X_scaled, test_Y_ohe)
+
+print('Keras NN:\t', score)
+predskeras_nn = (predskeras_nn > 0.20).astype(int)
+#failed_keras = printWrongPreds(predskeras_nn,test_Y_ohe)
 # Image Classification
 
 ## Support Vector Machines
-
+"""
 classes = np.sort(np.array(Y_cat['EunisCode'].unique()))
 class_map = dict((k,v) for (k, v) in zip(classes, [np.float32(i) for i in range(0,len(classes))]))
 path_to_imgs = '/home/diegues/Desktop/ProcessedImages/LabeledData/'
@@ -127,11 +155,11 @@ for file in os.listdir(path_to_imgs):
     flat_array = array.ravel()
     if file in train_X_cat.index:
         X_train.append(flat_array)
-        y_train.append(class_map[train_Y_cat['EunisCode'].loc[file]])
+        y_train.append(int(class_map[train_Y_cat['EunisCode'].loc[file]]))
         
     elif file in test_X_cat.index:
         X_test.append(flat_array)
-        y_test.append(class_map[test_Y_cat['EunisCode'].loc[file]])
+        y_test.append(int(class_map[test_Y_cat['EunisCode'].loc[file]]))
 
 X_train = np.float32(X_train)
 X_test = np.float32(X_test)
@@ -145,6 +173,93 @@ img_svm.setC(2.67)
 img_svm.setGamma(5.383)
 img_svm.train(X_train, cv2.ml.ROW_SAMPLE, y_train)
         
-result = img_svm.predict(y_train)[1]
+result = img_svm.predict(X_test)[1]
+"""
+## Convolutional Neural Networks - VGG config D
 
-## Convolutional Neural Networks
+vgg16 = Sequential()
+
+vgg16.add(Conv2D(64,(3,3),activation='relu', input_shape=(224,224,3), padding='same'))
+vgg16.add(Conv2D(64,(3,3),activation='relu', padding='same'))
+vgg16.add(MaxPooling2D((2,2), (2,2)))
+vgg16.add(Dropout(.25))
+
+vgg16.add(Conv2D(128,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(128,(3,3),activation='relu', padding='same'))
+vgg16.add(MaxPooling2D((2,2), (2,2)))
+vgg16.add(Dropout(.5))
+
+vgg16.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+vgg16.add(MaxPooling2D((2,2), (2,2)))
+vgg16.add(Dropout(.5))
+
+vgg16.add(Conv2D(512,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(512,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(512,(3,3),activation='relu', padding='same'))
+vgg16.add(MaxPooling2D((2,2), (2,2)))
+vgg16.add(Dropout(.5))
+
+vgg16.add(Conv2D(512,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(512,(3,3),activation='relu', padding='same'))
+vgg16.add(Conv2D(512,(3,3),activation='relu', padding='same'))
+vgg16.add(MaxPooling2D((2,2), (2,2)))
+vgg16.add(Dropout(.5))
+
+vgg16.add(Flatten())
+vgg16.add(Dense(4096, activation='relu'))
+vgg16.add(Dropout(0.25))
+vgg16.add(Dense(4096, activation='relu'))
+vgg16.add(Dropout(0.5))
+vgg16.add(Dense(1000, activation='relu'))
+vgg16.add(Dropout(0.75))
+vgg16.add(Dense(13, activation='softmax'))
+
+vgg16.compile(loss='categorical_crossentropy',
+              optimizer='adam',
+              metrics=['accuracy'])
+vgg16.summary()
+
+# DeepSense AI NOAA competition approach
+
+dsaiNOAA = Sequential()
+
+dsaiNOAA.add(Conv2D(32,(3,3),activation='relu', input_shape=(512,512,3), padding='same'))
+dsaiNOAA.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+dsaiNOAA.add(Dropout(.25))
+
+dsaiNOAA.add(Conv2D(64,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+dsaiNOAA.add(Dropout(.25))
+
+dsaiNOAA.add(Conv2D(64,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(Conv2D(128,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(Conv2D(128,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+dsaiNOAA.add(Dropout(.25))
+
+dsaiNOAA.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+dsaiNOAA.add(Dropout(.25))
+
+dsaiNOAA.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+dsaiNOAA.add(Dropout(.5))
+
+dsaiNOAA.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(Conv2D(256,(3,3),activation='relu', padding='same'))
+dsaiNOAA.add(MaxPooling2D(pool_size=(3,3), strides=(2,2)))
+dsaiNOAA.add(Dropout(.5))
+
+dsaiNOAA.add(Flatten())
+dsaiNOAA.add(Dense(256, activation='relu'))
+dsaiNOAA.add(Dense(64, activation='relu'))
+dsaiNOAA.add(Dense(13, activation='softmax'))
+
+dsaiNOAA.compile(loss='categorical_crossentropy',
+              optimizer='adam',
+              metrics=['accuracy'])
+dsaiNOAA.summary()
