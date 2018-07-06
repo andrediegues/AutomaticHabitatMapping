@@ -87,7 +87,7 @@ def applyMergeStretch(photos_path):
     print("RGB stretching took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
  
 def applyWhiteBalance(photos_path):    
-    list_of_photos = os.listdir(os.getcwd())
+    list_of_photos = os.listdir(photos_path)
     wb_path = '../WhiteBalance/'
     createDir(wb_path)
     
