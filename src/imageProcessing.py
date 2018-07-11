@@ -104,7 +104,7 @@ def applyWhiteBalance(photos_path):
 
 def applyICM(photos_path):
     list_of_photos = os.listdir(os.getcwd())
-    icm_path = '../ICM/'
+    icm_path = '../icm/'
     createDir(icm_path)
     
     pool = mp.Pool(processes = mp.cpu_count())

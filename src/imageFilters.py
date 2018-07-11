@@ -49,14 +49,8 @@ def createHash(img, bot, top):
     return hashmap
 
 def linearStretch(img):
-    if min(img.ravel()) == 0:
-        bot = np.percentile(img.ravel(), 1)
-    else:
-        bot = min(img.ravel())
-    if max(img.ravel()) == 255:
-        top = np.percentile(img.ravel(), 99)
-    else:
-        top = max(img.ravel())
+    bot = min(img.ravel())
+    top = max(img.ravel())
         
     hashmap = createHash(img, bot, top)
     img2 = img
