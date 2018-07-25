@@ -9,7 +9,7 @@ Created on Thu Jun 14 13:52:52 2018
 import pandas as pd
 import os
 
-path = "/home/diegues/Desktop/ProcessedImages/"
+path = "/home/diegues/andre.diegues@lsts.pt/ProcessedImages/01_05_18/"
 
 labeled_data = pd.DataFrame(columns=['filename', 'timestamp', 'latitude', 'longitude', 'roll', 'pitch', 'entropy', 'date', 'depth', 
                                      'EunisCode', 'EunisName', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 'species', 'AphiaID'])
@@ -25,19 +25,22 @@ for folder in [f for f in os.listdir(path) if os.path.isdir(path+f)]:
     if not os.path.exists(datafile):
         print(datafile , "doesn't exist!")
         continue
-    data = pd.read_csv(datafile, 
-                       names=['filename', 'timestamp', 'latitude', 'longitude', 'altitude', 'roll', 'pitch', 'depth', 'entropy', 'date'])[1:]
+    print('reading',folder)
+    data = pd.read_csv(datafile)
+    total_depth = data['altitude'] + data['depth']
     data = data.drop(['altitude', 'depth'], axis = 1)
+    data['depth'] = total_depth
     targetsfile = path + folder + "/" + folder + "-targets.csv"
     if not os.path.exists(targetsfile):
         print(targetsfile , "doesn't exist!")
         continue
-    targets = pd.read_csv(targetsfile,
-                          names=['filename', 'date', 'longitude', 'latitude', 'depth', 'EunisCode', 'EunisName', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 
-                                 'species', 'AphiaID'])[1:]
-    targets = targets.drop(['date', 'longitude', 'latitude'], axis=1)
+    targets = pd.read_csv(targetsfile, names=['filename', 'date', 'longitude', 'latitude', 'depth', 'EunisCode', 'EunisName', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 
+'species', 'AphiaID'])[1:]
+    targets = targets.drop(['date', 'longitude', 'latitude', 'depth'], axis=1)
     join_dfs = pd.merge(data, targets, on='filename', how='outer')
+    print(join_dfs.EunisCode[:3].isnull())
     non_empty_targets = join_dfs[join_dfs['EunisCode'].notnull()]
+    print(non_empty_targets.head())
     empty_targets = join_dfs[join_dfs['EunisCode'].isnull()]
     labeled_data = labeled_data.append(non_empty_targets)
     unlabeled_data = unlabeled_data.append(empty_targets)
