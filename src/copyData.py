@@ -10,7 +10,7 @@ import pandas as pd
 import os
 from shutil import copyfile
 
-folder = '/home/diegues/Desktop/ProcessedImages/'
+folder = '/media/newdrive/20180501/ProcessedImages/'
 df = pd.read_csv(folder + 'labeled_data.csv')
 subfolders = [d for d in os.listdir(folder) if os.path.isdir(folder + d)]
 filenames = df['filename']

@@ -61,7 +61,7 @@ def linearStretch(img):
 def createROI(img):
     return img[150:840, 220:1140]
 
-def powerStretch(img): # not so good but worth a try
+def powerStretch(img):
     img2 = img
     img2 = img2.astype(np.float)
     c = (img2.max()) / (img2.max()**(2))
