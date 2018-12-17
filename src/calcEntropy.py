@@ -4,6 +4,8 @@
 Created on Thu May  3 16:32:47 2018
 
 @author: diegues
+
+Adds a column to the CSV file with the average number of bit necessary to represent, in average, a pixel of the image (Shannon's Entropy).
 """
 
 from skimage.io import imread

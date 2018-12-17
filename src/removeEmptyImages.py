@@ -4,6 +4,8 @@
 Created on Mon Apr  9 16:12:24 2018
 
 @author: diegues
+
+Filters the images by its amount of information (entropy). Images with a big amount of entropy (after enhancement) have more noise hwich reflects into a larger entropy value. 
 """
 
 import sys
@@ -19,11 +21,11 @@ new_names = []
 date = logpath.split('/')[-2][-2:] + '/' + logpath.split('/')[-2][-4:-2] + '/' + logpath.split('/')[-2][-6:-4]
 dates = []
 data = pd.read_csv(logpath + '/mra/FilteredPhotos/positions.csv')
-#value = data.describe()['entropy']['75%']
-#answer = input('75%: ' + str(value) + '\nIntroduce a different value (enter ''no'' to maintain the same):')
-#if('n' not in answer):
-#    value = answer
-#namesToCopy = data[data['entropy'].astype(float) <= float(value)]
+value = data.describe()['entropy']['75%']
+answer = input('75%: ' + str(value) + '\nIntroduce a different value (enter ''no'' to maintain the same):')
+if('n' not in answer):
+    value = answer
+namesToCopy = data[data['entropy'].astype(float) <= float(value)]
 namesToCopy = data
 os.mkdir(new_folder)
 for file in namesToCopy['filename']:

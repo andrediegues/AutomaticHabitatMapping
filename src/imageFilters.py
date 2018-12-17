@@ -4,38 +4,48 @@
 Created on Mon Nov 13 15:49:11 2017
 
 @author: diegues
+
+This module contains functions with image transformations. It serves as an auxiliary module to 'ImageProcessing.py'.
 """
-# tried numba but increased the processing time by almost a double of what was taking without it
+
+
 import cv2
 import numpy as np
 import itertools as it
 
+# Returns a grayscale image of the path 'imgname'
 def grayscale(imgname):
     return cv2.imread(imgname, 0)
 
+# Returns the blue values of the image of the path 'imgname'. Optionally you can provide the image as an argument.
 def bluefilter(imgname, img = None):
     if img is None:
         img = cv2.imread(imgname)
     return img[:,:,0]
     
+# Returns the green values of the image of the path 'imgname'. Optionally you can provide the image as an argument.
 def greenfilter(imgname, img = None):
     if img is None:
         img = cv2.imread(imgname)
     return img[:,:,1]
 
+# Returns the red values of the image of the path 'imgname'. Optionally you can provide the image as an argument.
 def redfilter(imgname, img = None):
     if img is None:
         img = cv2.imread(imgname)
     return img[:,:,2]
 
+# Returns the negative image of the path 'imgname'.
 def negativefilter(imgname):
     img = cv2.imread(imgname)
     return 255 - img
 
+# Returns the Dynamic Range Manipulation of the image of the path 'imgname'. 
 def drm(imgname):
     img = cv2.imread(imgname)
     return max(img.ravel()) - img
 
+# Returns an hash of values that compute Contrast Stretching formula to prevent recalculating the same values over and over
 def createHash(img, bot, top):
     hashmap = {}
     for i,j in it.product(range(img.shape[0]), range(img.shape[1])):
@@ -48,6 +58,7 @@ def createHash(img, bot, top):
                 hashmap[img[i,j]] = 255 * ((img[i,j] - bot) / (top - bot))
     return hashmap
 
+# Contrast Stretching processing
 def linearStretch(img):
     bot = min(img.ravel())
     top = max(img.ravel())
@@ -58,9 +69,7 @@ def linearStretch(img):
         img2[i,j] = hashmap[img2[i,j]]
     return img2
 
-def createROI(img):
-    return img[150:840, 220:1140]
-
+# Power-level Transformation
 def powerStretch(img):
     img2 = img
     img2 = img2.astype(np.float)
@@ -72,26 +81,21 @@ def powerStretch(img):
     img2 = img2.astype(np.uint8)
     return img2
 
+# Applies colormap to grayscale image
 def pseudocoloring(imgname):
     img = cv2.imread(imgname)
     return cv2.applyColorMap(img, cv2.COLORMAP_WINTER)
 
+# Applies Contrast Stretching to each channel of an RGB image, merging them afterwards (not optimal result, see HSVConstrastStretch function that uses HSV color model)
 def rgbStretch(imgname):
     img = cv2.imread(imgname)
-    #hsvimg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)    
-    #hue = hsvimg[:,:,0]
-    #saturation = hsvimg[:,:,1]
-    #value = hsvimg[:,:,2]
-    #valuecs = linearStretch(value)
-    #saturationcs = linearStretch(saturation)
-    #hlscs = cv2.merge((hue,saturationcs,valuecs))
-    #m = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
     stretched_blue = linearStretch(bluefilter(imgname, img))
     stretched_green = linearStretch(greenfilter(imgname, img))
     stretched_red = linearStretch(redfilter(imgname, img))
     m = cv2.merge((stretched_blue, stretched_green, stretched_red))
     return m
 
+# Secundary function to find each RGB channel's maximum intensity in the image for the Max-White algorithm.
 def findmax(img):
     maxpixel = img[0,0]
     maxBlue = maxpixel[0]
@@ -110,12 +114,14 @@ def findmax(img):
             
     return [maxBlue,maxGreen,maxRed]
 
+# Function to compute each pixel's gain for the Max-White algorithm.
 def rescale(pixel, white):
     val = pixel * white
     if pixel * white > 255:
         return 255 
     return val
 
+# Max-White algorithm that returns a brighter image with correction of colors.
 def whitebalance(imgname):
     img = cv2.imread(imgname)
     newwhite = findmax(img)
@@ -137,8 +143,8 @@ def whitebalance(imgname):
         newimg[i,j] = np.array([hb[img[i,j][0]],hg[img[i,j][1]],hr[img[i,j][2]]])
     return newimg
 
+# HSV color model stretching of saturation and value channels to perform Contrast Stretching to a RGB image.
 def integratedColorModel(imgname):
-    #rgbcs = rgbStretch(imgname)
     img = cv2.imread(imgname)
     hsvimg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)    
     hue = hsvimg[:,:,0]
@@ -147,7 +153,7 @@ def integratedColorModel(imgname):
     valuecs = linearStretch(value)
     saturationcs = linearStretch(saturation)
     hlscs = cv2.merge((hue,saturationcs,valuecs))
-    imc = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
+    im = cv2.cvtColor(hlscs, cv2.COLOR_HSV2RGB)
    
-    return imc
+    return im
 

@@ -4,6 +4,8 @@
 Created on Wed Jun 20 14:57:43 2018
 
 @author: diegues
+
+Module that copy the data with less noise to a different folder. Change the folder path to your own.
 """
 
 import pandas as pd

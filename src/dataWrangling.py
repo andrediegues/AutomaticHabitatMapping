@@ -4,12 +4,14 @@
 Created on Thu Jun 14 13:52:52 2018
 
 @author: diegues
+
+This module analyzes all images in the given path and writes CSV files in accordance with the available information on the Habitat Type (EUNIS)
 """
 
 import pandas as pd
 import os
 
-path = "/home/diegues/andre.diegues@lsts.pt/ProcessedImages/01_05_18/"
+path = "/home/diegues/andre.diegues@lsts.pt/ProcessedImages/01_05_18/" # change path to your own (should be the path where you keep the log folders)
 
 labeled_data = pd.DataFrame(columns=['filename', 'timestamp', 'latitude', 'longitude', 'roll', 'pitch', 'entropy', 'date', 'depth', 
                                      'EunisCode', 'EunisName', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 'species', 'AphiaID'])
@@ -49,9 +51,3 @@ for folder in [f for f in os.listdir(path) if os.path.isdir(path+f)]:
 labeled_data.to_csv(path + "labeled_data.csv", index = False)
 unlabeled_data.to_csv(path + "unlabeled_data.csv", index = False)
 total_data.to_csv(path + "total_data.csv", index = False)
-classes = labeled_data.level3.unique()
-classesfile = open(path + "classes.txt", "w")
-for c in classes:
-    classesfile.write(c + "\n")
-classesfile.close()
-

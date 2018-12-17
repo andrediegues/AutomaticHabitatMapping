@@ -5,7 +5,7 @@ Created on Thu Nov  9 14:02:43 2017
 
 @author: diegues
 
-This is the main module. It contains some of the possible actions in order to process/transform an image (see options below). 
+This module contains some of the possible actions in order to process/transform an image (see options below). 
 If no option is provided, it applies the Integrated Color Model which uses RGB constrast stretching of the images plus stretching of the HSV model in the Saturation and Value channels.
 
 OPTIONS:
@@ -22,6 +22,7 @@ import imageFilters as imf
 import multiprocessing as mp
 import time
 
+# creates the pooling map in order to allow multithreading
 def applyLinearStretching(photos_path):
     list_of_photos = os.listdir(os.getcwd())
     linear_path = '../LinearStretching/'
@@ -36,7 +37,7 @@ def applyLinearStretching(photos_path):
     
     print("Linear stretching took",int((time1 - time0) // 60), "minutes and", round((time1 - time0) % 60), "seconds.")
 
-
+# creates the pooling map in order to allow multithreading
 def applyPowerStretching(photos_path):
     list_of_photos = os.listdir(os.getcwd())
     nonlinear_path = '../PowerLawTransformStretching/'
@@ -51,6 +52,7 @@ def applyPowerStretching(photos_path):
     
     print("Non-linear stretching took",int((time1 - time0) // 60), "minutes and", round((time1 - time0) % 60), "seconds.")
 
+# creates the pooling map in order to allow multithreading
 def applyPseudoColor(photos_path):
     contrast_path = '../LinearStretching/'
     if not checkPath(contrast_path):
@@ -72,6 +74,7 @@ def applyPseudoColor(photos_path):
     
     print("Pseudocoloring took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
 
+# creates the pooling map in order to allow multithreading
 def applyMergeStretch(photos_path):
     list_of_photos = os.listdir(os.getcwd())
     rgbstretch_path = "../RGBstretch/"
@@ -85,7 +88,8 @@ def applyMergeStretch(photos_path):
     time1 = time.time()
     
     print("RGB stretching took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
- 
+
+# creates the pooling map in order to allow multithreading 
 def applyWhiteBalance(photos_path):    
     list_of_photos = os.listdir(photos_path)
     wb_path = '../WhiteBalance/'
@@ -102,6 +106,7 @@ def applyWhiteBalance(photos_path):
     
     return os.path.abspath(wb_path)
 
+# creates the pooling map in order to allow multithreading
 def applyICM(photos_path):
     list_of_photos = os.listdir(os.getcwd())
     icm_path = '../icm/'
@@ -115,13 +120,15 @@ def applyICM(photos_path):
     pool.map(icm, list_of_photos)
     time1 = time.time() 
     print("Task took",int((time1 - time0) // 60), "minutes and", round((time1 - time0)% 60), "seconds.")
-    
+
+# secondary function that writes the new image    
 def wbHandler(path, photoname):
     wb_photoname = 'wb_' + photoname
     if wb_photoname not in os.listdir(path):
         wb_photo = imf.whitebalance(photoname)
         cv2.imwrite(path + wb_photoname, wb_photo)
-        
+       
+# secondary function that writes the new image
 def icmHandler(path, photoname):
     icm_photoname = 'icm_' + photoname
     if icm_photoname not in os.listdir(path):
@@ -138,7 +145,8 @@ def checkPath(path):
 def createDir(path): 
     if not os.path.exists(path):
         os.mkdir(path)
-        
+
+# secondary function that writes the new image        
 def nonLinearStretchHandler(contrast_path, photoname):
     
     im = cv2.imread(photoname)
@@ -152,13 +160,14 @@ def nonLinearStretchHandler(contrast_path, photoname):
         im_power_law_transformation = cv2.cvtColor(im_power_law_transformation,cv2.COLOR_BGR2RGB)
         cv2.imwrite(contrast_path + pow_stretch_name, im_power_law_transformation)
 
-
+# secondary function that writes the new image
 def rgbStretchHandler(rgb_path, photoname):
     rgbname = "rgb_" + photoname
     if rgbname not in os.listdir(rgb_path):
         rgb_photo = imf.rgbStretch(photoname)
         cv2.imwrite(rgb_path + rgbname, rgb_photo)
 
+# secondary function that writes the new image
 def linearStretchHandler(contrast_path, photoname):
     gray_photo = imf.grayscale(photoname)
     lin_stretch_name = 'l_' + photoname
@@ -166,6 +175,7 @@ def linearStretchHandler(contrast_path, photoname):
         lin_stretch_gray = imf.linearStretch(gray_photo)
         cv2.imwrite(contrast_path + lin_stretch_name, lin_stretch_gray) 
         
+# secondary function that writes the new image
 def pseudoColorHandler(contrast_path, pseudocolor_path, photoname):
     pseudocolor_name = "pseudo_" + photoname
     os.chdir(contrast_path)
@@ -193,8 +203,6 @@ def main():
         os.chdir(photos_path)
         photos_path = applyWhiteBalance(photos_path)
         os.chdir(photos_path)
-        #if not checkPath(photos_path):
-         #   sys.exit(1)
         if "--pseudocolor" in sys.argv or "-p" in sys.argv:
             applyPseudoColor(photos_path)
         elif "--linearstretch" in sys.argv or "-l" in sys.argv:
